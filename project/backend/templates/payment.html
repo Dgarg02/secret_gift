@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payment | SecretGift</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+    .glass {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    html.dark .glass {
+      background: rgba(15,15,15,0.65);
+      border-color: rgba(255,255,255,0.1);
+    }
+  </style>
+</head>
+
+<body class="bg-[#FAFAF9] dark:bg-[#050505] text-slate-800 dark:text-gray-200 min-h-screen px-6 py-20">
+
+<script>
+  // ================= AUTH GUARD =================
+  if (!localStorage.getItem("token")) {
+    localStorage.setItem("redirectAfterLogin", "/payment");
+    window.location.href = "/login";
+  }
+</script>
+
+<div class="max-w-3xl mx-auto">
+
+  <h1 class="font-serif text-4xl text-center mb-10">
+    Complete Your Gift ✨
+  </h1>
+
+  <div class="glass rounded-3xl p-8 md:p-12">
+
+    <div class="space-y-4 mb-8 text-sm">
+      <div class="flex justify-between">
+        <span class="opacity-70">Plan</span>
+        <span id="planText" class="font-semibold"></span>
+      </div>
+      <div class="flex justify-between">
+        <span class="opacity-70">Experience</span>
+        <span id="experienceText" class="font-semibold"></span>
+      </div>
+      <div class="flex justify-between border-t pt-4 text-lg font-bold">
+        <span>Total</span>
+        <span id="amountText"></span>
+      </div>
+    </div>
+
+    <button id="payBtn"
+      class="w-full py-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500
+             text-white text-lg font-semibold hover:scale-105 transition">
+      Pay Securely
+    </button>
+
+    <p class="text-xs text-center mt-6 opacity-50">
+      Secure Razorpay Payment 🔒
+    </p>
+  </div>
+</div>
+
+<script>
+  // ================= THEME =================
+  document.documentElement.className =
+    localStorage.getItem("theme") ||
+    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+  // ================= DATA =================
+  const plan = localStorage.getItem("selectedPlan");
+  const experience = localStorage.getItem("selectedExperience") || "all";
+  const amount = Number(localStorage.getItem("amount"));
+  const token = localStorage.getItem("token");
+
+  if (!plan || !amount) {
+    window.location.href = "/select-plan";
+  }
+
+  document.getElementById("planText").innerText =
+    plan === "combo" ? "Combo Plan" : "Individual Plan";
+
+  document.getElementById("experienceText").innerText =
+    plan === "combo" ? "All Experiences Unlocked" : experience.replace("-", " ").toUpperCase();
+
+  document.getElementById("amountText").innerText = `₹${amount}`;
+
+  // ================= PAYMENT =================
+  const payBtn = document.getElementById("payBtn");
+
+  payBtn.onclick = async () => {
+    payBtn.innerText = "Processing...";
+    payBtn.disabled = true;
+    payBtn.style.opacity = "0.8";
+
+    // 1️⃣ Create Razorpay Order
+    const res = await fetch("/api/payment/create-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ amount })
+    });
+
+    const order = await res.json();
+
+    if (!order.success && !order.order_id) {
+      alert("Unable to create payment order");
+      payBtn.innerText = "Pay Securely";
+      payBtn.disabled = false;
+      return;
+    }
+
+    // 2️⃣ Razorpay Checkout
+    const options = {
+      key: order.key_id,
+      amount: order.amount,
+      currency: "INR",
+      name: "SecretGift",
+      description: "Unlock Emotional Experience",
+      order_id: order.order_id,
+
+      handler: async function (response) {
+
+        // 3️⃣ Verify Payment
+        const verify = await fetch("/api/payment/verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            plan,
+            experience,
+            amount
+          })
+        });
+
+        const result = await verify.json();
+
+        if (result.success) {
+          localStorage.setItem("paymentStatus", "paid");
+
+          if (plan === "combo") {
+            window.location.href = "/combo-journey";
+          } else {
+            window.location.href = "/experience-router";
+          }
+        } else {
+          alert("Payment verification failed ❌");
+          payBtn.innerText = "Pay Securely";
+          payBtn.disabled = false;
+        }
+      },
+
+      theme: { color: "#a855f7" }
+    };
+
+    const rzp = new Razorpay(options);
+
+    rzp.on("payment.failed", function () {
+      alert("Payment failed ❌");
+      payBtn.innerText = "Pay Securely";
+      payBtn.disabled = false;
+    });
+
+    rzp.open();
+  };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Gift | SecretGift</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          animation: {
+            'blob': 'blob 7s infinite',
+            'fade-in': 'fadeIn 0.5s ease-out forwards',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      transition: background-color .5s ease, color .5s ease;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    }
+
+    html.dark .glass {
+      background: rgba(18, 18, 18, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    textarea::-webkit-scrollbar { width: 8px; }
+    textarea::-webkit-scrollbar-track { background: transparent; }
+    textarea::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 20px; }
+    
+    .input-group:focus-within i { color: #a855f7; }
+  </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-[#0a0a0a] text-slate-800 dark:text-gray-200 min-h-screen relative overflow-x-hidden">
+
+<div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+  <div class="absolute top-0 left-1/4 w-96 h-96 bg-purple-300 dark:bg-purple-900/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-30 animate-blob"></div>
+  <div class="absolute top-0 right-1/4 w-96 h-96 bg-pink-300 dark:bg-pink-900/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+  <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-blue-300 dark:bg-indigo-900/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+</div>
+
+<nav class="fixed top-0 inset-x-0 z-50 transition-all duration-300" id="navbar">
+  <div class="glass border-b-0 rounded-b-[2rem] mx-4 mt-2 max-w-7xl lg:mx-auto">
+    <div class="px-6 py-4 flex justify-between items-center">
+      <a href="/" class="flex items-center gap-2 group">
+        <span class="text-2xl group-hover:rotate-12 transition-transform duration-300">🎁</span>
+        <span class="font-bold text-lg tracking-tight">SecretGift</span>
+      </a>
+
+      <div class="flex items-center gap-3">
+        <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 transition-colors">
+          <i class="ph ph-moon text-xl dark:hidden"></i>
+          <i class="ph ph-sun text-xl hidden dark:block"></i>
+        </button>
+        <button onclick="logout()" class="px-5 py-2 rounded-full text-sm font-medium bg-black text-white dark:bg-white dark:text-black hover:opacity-80 transition transform active:scale-95">
+          Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="pt-32 px-4 pb-24 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-3xl animate-fade-in">
+    <div class="text-center mb-10">
+      <h1 class="font-serif text-4xl md:text-6xl mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-500 dark:from-purple-400 dark:to-pink-300">
+        Create Magic
+      </h1>
+      <p class="text-lg opacity-70 max-w-lg mx-auto">
+        Wrap your feelings in a digital box. Only those with the key can open it.
+      </p>
+    </div>
+
+    <form onsubmit="saveAndRedirect(event)" class="glass rounded-[2.5rem] p-8 md:p-12 shadow-2xl space-y-8 relative overflow-hidden">
+      
+      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50"></div>
+
+      <div class="space-y-2 group input-group">
+        <label class="text-sm font-semibold tracking-wide opacity-70 uppercase pl-1">Title</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="ph ph-gift text-xl text-gray-400 transition-colors"></i>
+          </div>
+          <input type="text" id="giftTitle" required
+                 placeholder="e.g. For my favorite person..."
+                 class="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all duration-300 placeholder:text-gray-400">
+        </div>
+      </div>
+
+      <div class="space-y-2 group input-group">
+        <label class="text-sm font-semibold tracking-wide opacity-70 uppercase pl-1">Your Message</label>
+        <div class="relative">
+          <div class="absolute top-4 left-0 pl-4 pointer-events-none">
+            <i class="ph ph-envelope-open text-xl text-gray-400 transition-colors"></i>
+          </div>
+          <textarea id="giftMessage" rows="6" required
+                    placeholder="Write something that matters..."
+                    class="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all duration-300 resize-none placeholder:text-gray-400 leading-relaxed"></textarea>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-sm font-semibold tracking-wide opacity-70 uppercase pl-1">Cover Image</label>
+        <div class="relative group">
+            <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(this)">
+            
+            <label for="fileInput" id="dropZone"
+                   class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl cursor-pointer bg-gray-50/30 dark:bg-white/5 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-400 transition-all duration-300 overflow-hidden relative">
+                
+                <div id="uploadPrompt" class="flex flex-col items-center justify-center pt-5 pb-6 transition-opacity duration-300">
+                    <div class="w-12 h-12 mb-3 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center text-purple-500">
+                        <i class="ph ph-image text-2xl"></i>
+                    </div>
+                    <p class="mb-1 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold text-purple-600">Click to upload</span> or drag and drop</p>
+                    <p class="text-xs text-gray-400">SVG, PNG, JPG or GIF</p>
+                </div>
+
+                <img id="imagePreview" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500" />
+                
+                <button type="button" id="removeImageBtn" onclick="removeImage(event)" class="hidden absolute top-3 right-3 p-2 bg-black/50 hover:bg-red-500 text-white rounded-full backdrop-blur-sm transition-colors z-10">
+                    <i class="ph ph-x"></i>
+                </button>
+            </label>
+        </div>
+      </div>
+
+      <div class="space-y-2 group input-group">
+        <label class="text-sm font-semibold tracking-wide opacity-70 uppercase pl-1">Secret Password</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="ph ph-lock-key text-xl text-gray-400 transition-colors"></i>
+          </div>
+          <input type="password" id="passwordInput" required
+                 placeholder="Create a key..."
+                 class="w-full pl-12 pr-12 py-4 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all duration-300 placeholder:text-gray-400">
+          
+          <button type="button" onclick="togglePassword()"
+                  class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-purple-500 transition-colors cursor-pointer">
+            <i class="ph ph-eye-slash text-xl" id="eyeIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="pt-4">
+        <button type="submit"
+                class="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-2xl text-white bg-gray-900 dark:bg-white dark:text-black overflow-hidden transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95">
+          <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+          <span class="relative flex items-center gap-2">
+             Select a Plan <i class="ph ph-arrow-right"></i>
+          </span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</main>
+
+<footer class="text-center text-sm opacity-60 pb-8">
+  <p>&copy; 2025 SecretGift · Crafted with <span class="text-red-500 animate-pulse">❤</span></p>
+</footer>
+
+<script>
+  // --- Theme Logic ---
+  const root = document.documentElement;
+  const initialTheme = localStorage.getItem("theme") || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  root.className = initialTheme;
+
+  function toggleTheme() {
+    const isDark = root.classList.contains('dark');
+    root.className = isDark ? 'light' : 'dark';
+    localStorage.setItem("theme", isDark ? 'light' : 'dark');
+  }
+
+  function logout() {
+    localStorage.removeItem("isAuthenticated");
+    window.location.href = "/";
+  }
+
+  function togglePassword() {
+    const input = document.getElementById('passwordInput');
+    const icon = document.getElementById('eyeIcon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.replace('ph-eye-slash', 'ph-eye');
+    } else {
+      input.type = 'password';
+      icon.classList.replace('ph-eye', 'ph-eye-slash');
+    }
+  }
+
+  // --- Image Upload Logic ---
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const imagePreview = document.getElementById('imagePreview');
+  const uploadPrompt = document.getElementById('uploadPrompt');
+  const removeBtn = document.getElementById('removeImageBtn');
+
+  function handleFileSelect(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imagePreview.src = e.target.result;
+        imagePreview.classList.remove('opacity-0');
+        uploadPrompt.classList.add('opacity-0');
+        removeBtn.classList.remove('hidden');
+      }
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function removeImage(e) {
+    e.preventDefault(); e.stopPropagation();
+    fileInput.value = '';
+    imagePreview.src = '';
+    imagePreview.classList.add('opacity-0');
+    uploadPrompt.classList.remove('opacity-0');
+    removeBtn.classList.add('hidden');
+  }
+
+  // Drag & Drop
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, preventDefaults, false));
+  function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+  ['dragenter', 'dragover'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.add('border-purple-500', 'bg-purple-50', 'dark:bg-purple-900/30'), false));
+  ['dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.remove('border-purple-500', 'bg-purple-50', 'dark:bg-purple-900/30'), false));
+  dropZone.addEventListener('drop', (e) => {
+    fileInput.files = e.dataTransfer.files;
+    handleFileSelect(fileInput);
+  }, false);
+
+
+  // ================= SAVE DATA & REDIRECT =================
+  
+  // Helper to convert image to Base64
+  const toBase64 = file => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+  });
+
+  async function saveAndRedirect(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    
+    // 1. UI Loading State
+    btn.disabled = true;
+    const oldText = btn.innerHTML;
+    btn.innerHTML = `<i class="ph ph-spinner animate-spin text-xl"></i> Saving...`;
+
+    // 2. Gather Data
+    const title = document.getElementById('giftTitle').value;
+    const message = document.getElementById('giftMessage').value;
+    const password = document.getElementById('passwordInput').value;
+    const file = fileInput.files[0];
+
+    // 3. Process Image (if exists)
+    let imageData = null;
+    if (file) {
+        try {
+            imageData = await toBase64(file);
+        } catch (error) {
+            console.error("Error processing image", error);
+        }
+    }
+
+    // 4. Create Object
+    const giftData = {
+        title: title,
+        message: message,
+        password: password,
+        image: imageData, // This is a Base64 string
+        createdAt: new Date().toISOString()
+    };
+
+    // 5. Save to LocalStorage
+    try {
+        localStorage.setItem("draftGift", JSON.stringify(giftData));
+        
+        // 6. Redirect to Plan Selection
+        // Artificial delay for UX
+        setTimeout(() => {
+             window.location.href = "/select-plan"; // Make sure this file exists!
+        }, 800);
+        
+    } catch (e) {
+        alert("Your image might be too large for local storage. Try a smaller one!");
+        btn.disabled = false;
+        btn.innerHTML = oldText;
+    }
+  }
+</script>
+
+</body>
+</html>

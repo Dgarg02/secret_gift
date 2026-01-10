@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Destiny & Love ✨</title>
+
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Great+Vibes&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ---------- 1. ROMANTIC CORE ---------- */
+:root {
+  --rose-primary: #ec4899; /* Pink-500 */
+  --rose-deep: #be185d;    /* Pink-700 */
+  --rose-light: #fce7f3;   /* Pink-100 */
+  --peach-gold: #fb7185;   /* Rose-400 */
+  --glass-border: rgba(255, 255, 255, 0.4);
+}
+
+body {
+  /* Soft dreamy gradient background */
+  background: linear-gradient(135deg, #fff1f2 0%, #fce7f3 50%, #fbcfe8 100%);
+  color: var(--rose-deep);
+  font-family: 'Montserrat', sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3 { font-family: 'Cinzel Decorative', serif; }
+.font-cursive { font-family: 'Great Vibes', cursive; }
+
+/* Background Video Overlay - Pink Tint */
+.video-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(255, 241, 242, 0.6), rgba(252, 231, 243, 0.85));
+  z-index: 0; pointer-events: none;
+}
+.bg-video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: -1; opacity: 0.5; filter: sepia(0.5) hue-rotate(310deg);
+}
+
+.screen {
+  position: fixed; inset: 0; display: none;
+  justify-content: center; align-items: center;
+  flex-direction: column; z-index: 10;
+  padding: 1rem; /* Mobile padding */
+}
+
+/* ---------- 2. UI COMPONENTS (Soft & Dreamy) ---------- */
+
+/* Romantic Glass Panel */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 2px solid var(--glass-border);
+  box-shadow: 0 20px 40px -12px rgba(236, 72, 153, 0.2), inset 0 0 20px rgba(255,255,255,0.5);
+  border-radius: 30px; /* Softer corners */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Rose Gold Button */
+.btn-rose {
+  background: linear-gradient(135deg, #f472b6 0%, #e11d48 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 10px 20px -5px rgba(244, 114, 182, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative; overflow: hidden;
+}
+.btn-rose:active { transform: scale(0.98); }
+
+/* Inputs */
+.input-soft {
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid rgba(236, 72, 153, 0.2);
+  color: var(--rose-deep);
+  font-family: 'Montserrat', sans-serif;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+.input-soft:focus {
+  outline: none;
+  border-color: var(--rose-primary);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.2);
+}
+.input-soft::placeholder { color: rgba(190, 24, 93, 0.5); }
+
+/* ---------- 3. GAME ASSETS (Recolored) ---------- */
+
+/* Soft Balloon */
+.balloon-3d {
+  width: 150px; height: 180px;
+  /* Pink/Peach Gradient */
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, #fda4af 25%, #ec4899 60%, #be185d 100%);
+  border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+  box-shadow: inset -10px -10px 20px rgba(157, 23, 77, 0.3), 0 20px 40px rgba(236, 72, 153, 0.3);
+  cursor: pointer; position: relative;
+  animation: float 4s ease-in-out infinite;
+}
+@keyframes float { 0%,100% {transform:translateY(0) rotate(-2deg)} 50% {transform:translateY(-15px) rotate(2deg)} }
+
+/* Shooter Elements */
+#gameArea { cursor: crosshair; touch-action: none; }
+.boss-container {
+  position: absolute; width: 180px; height: 180px;
+  border-radius: 50%;
+  border: 3px solid rgba(236, 72, 153, 0.5);
+  box-shadow: 0 0 50px rgba(236, 72, 153, 0.4);
+  display: flex; justify-content: center; align-items: center; z-index: 20;
+}
+.boss-ring {
+  position: absolute; inset: -10px; border-radius: 50%;
+  border: 2px dashed rgba(251, 113, 133, 0.7); /* Rose dashed ring */
+  animation: spin 12s linear infinite;
+}
+.boss-img {
+  width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+  border: 4px solid #ec4899;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.damage-float {
+  position: absolute; color: #be185d; font-family: 'Cinzel Decorative';
+  font-weight: 700; font-size: 28px;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.8); pointer-events: none; z-index: 50;
+  animation: floatUpFade 0.8s forwards;
+}
+@keyframes floatUpFade { to { transform: translateY(-60px) scale(1.1); opacity: 0; } }
+.shake-hard { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+/* Wheel Stage */
+.wheel-stage {
+  position: relative; padding: 8px;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* Custom Scrollbar for mobile */
+.custom-scroll::-webkit-scrollbar { width: 4px; }
+.custom-scroll::-webkit-scrollbar-track { background: rgba(236, 72, 153, 0.05); }
+.custom-scroll::-webkit-scrollbar-thumb { background: rgba(236, 72, 153, 0.3); border-radius: 10px; }
+</style>
+</head>
+
+<body>
+
+<section id="intro" class="screen flex">
+  <video id="introVideo" autoplay muted playsinline src="intro.mp4" class="bg-video"></video>
+  <div class="video-overlay"></div>
+  
+  <div class="z-10 text-center glass-panel px-10 py-12 mx-4 animate-[fadeIn_2s_ease-out]">
+    <div class="mb-2 text-rose-500 font-cursive text-3xl">Welcome to your</div>
+    <h1 class="text-5xl md:text-7xl font-bold text-rose-700 drop-shadow-sm mb-4">Love Story</h1>
+    <div class="h-[2px] w-20 bg-gradient-to-r from-transparent via-rose-400 to-transparent mx-auto"></div>
+  </div>
+</section>
+
+<section id="message" class="screen">
+  <div class="text-center p-8 md:p-12 glass-panel max-w-xl mx-4">
+    <h1 class="text-4xl md:text-5xl font-bold text-rose-700 mb-6">Destiny's Embrace</h1>
+    <p class="text-lg md:text-xl text-rose-800 font-light leading-relaxed">
+      "Let go of the shadows of yesterday, so your heart may open to the light of <span class="font-cursive text-3xl text-rose-500">new love</span>."
+    </p>
+  </div>
+</section>
+
+<section id="uploadScreen" class="screen">
+  <div class="glass-panel p-8 md:p-12 text-center flex flex-col items-center gap-6 max-w-lg w-full mx-4">
+    <div class="w-20 h-20 rounded-full bg-pink-100 flex items-center justify-center shadow-sm">
+      <i class="ri-heart-add-fill text-4xl text-rose-400"></i>
+    </div>
+    <div>
+      <h2 class="text-3xl text-rose-700 mb-2">Cherished Moments</h2>
+      <p class="text-rose-600/80">Gather the memories that make your heart smile.</p>
+    </div>
+    
+    <div id="uploadBtn" class="w-full h-28 border-3 border-dashed border-pink-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer bg-white/30 active:bg-pink-50 transition">
+      <span class="text-rose-400 font-bold text-sm uppercase tracking-wider">Tap to Upload Photos</span>
+    </div>
+  </div>
+  <input type="file" id="upload" multiple hidden>
+</section>
+
+<section id="balloonScreen" class="screen">
+  <div id="balloon" class="balloon-3d flex items-center justify-center group">
+    <div class="w-3 h-3 bg-white/60 rounded-full blur-[2px] absolute top-8 right-6"></div>
+  </div>
+  <h2 class="mt-10 text-xl text-rose-600/70 tracking-widest font-light uppercase">Pop for Magic</h2>
+</section>
+
+<section id="imageScreen" class="screen bg-pink-50/90 backdrop-blur-md p-0">
+  <div class="w-full h-full flex items-center justify-center p-4">
+    <img id="img" class="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain transition duration-500">
+  </div>
+  <div class="absolute bottom-8 text-rose-400 font-medium text-sm tracking-widest uppercase">Tap to Continue</div>
+</section>
+
+<section id="crystalScreen" class="screen">
+  <video autoplay muted loop playsinline src="crystal.mp4" class="bg-video"></video>
+  <div class="video-overlay"></div>
+
+  <div class="absolute inset-0 flex items-center justify-center z-10 p-6">
+    <div id="futureText" class="glass-panel px-8 py-10 w-full text-2xl md:text-3xl text-center text-rose-800 font-cursive leading-relaxed min-h-[120px] shadow-xl flex items-center justify-center"></div>
+  </div>
+
+  <div id="crystalInput" class="absolute bottom-8 glass-panel p-6 rounded-[2rem] w-[92%] max-w-md z-20">
+    <div class="flex items-center gap-2 mb-3 justify-center">
+      <i class="ri-sparkling-2-fill text-rose-400"></i>
+      <label class="text-rose-500 text-xs font-bold uppercase tracking-widest">Your Heart's Desire</label>
+    </div>
+    <textarea id="userText" rows="2" class="w-full p-4 rounded-xl input-soft text-lg text-center" placeholder="What love do you wish for?"></textarea>
+    <button id="revealBtn" class="w-full mt-4 py-4 rounded-xl btn-rose shadow-md">Ask the Oracle 💖</button>
+  </div>
+</section>
+
+<section id="shooterSetup" class="screen">
+  <div class="glass-panel p-8 md:p-12 text-center max-w-md w-full mx-4">
+    <i class="ri-heart-broken-line text-6xl text-rose-400 mb-4 block animate-pulse"></i>
+    <h2 class="text-3xl text-rose-700 mb-2">Release Heartbreak</h2>
+    <p class="text-rose-600/80 mb-6 leading-relaxed">Upload a symbol of past pain or doubt. It's time to <strong class="text-rose-500">break through</strong> and let it go.</p>
+    <button id="uploadHateBtn" class="w-full py-4 rounded-xl btn-rose shadow-lg text-sm">
+      UPLOAD OBSTACLE 💔
+    </button>
+    <button id="skipGameBtn" class="mt-6 text-rose-400/60 active:text-rose-500 text-sm underline transition py-2">Skip this step</button>
+    <input type="file" id="hateUpload" hidden>
+  </div>
+</section>
+
+<section id="shooterGame" class="screen bg-pink-50">
+  <div id="gameArea" class="absolute inset-0 overflow-hidden"></div>
+  
+  <div class="absolute top-4 left-4 right-4 z-30 flex flex-col gap-1 glass-panel p-3 rounded-2xl">
+    <div class="flex justify-between text-rose-500 text-xs font-bold uppercase tracking-widest px-2">
+      <span>Heartbreak Barrier</span>
+      <span id="hpText">100%</span>
+    </div>
+    <div class="w-full h-3 bg-pink-100 rounded-full overflow-hidden">
+      <div id="bossHpBar" class="h-full bg-gradient-to-r from-rose-400 to-pink-600 w-full transition-all duration-100"></div>
+    </div>
+  </div>
+
+  <div id="winMessage" class="absolute z-40 hidden flex-col items-center p-6 text-center animate-[zoomIn_0.5s_ease-out]">
+    <h1 class="text-5xl md:text-7xl font-cursive text-rose-600 drop-shadow-sm mb-6">Love Unlocked!</h1>
+    <button id="finishGameBtn" class="px-12 py-4 rounded-full btn-rose shadow-xl text-lg">FIND YOUR FATE</button>
+  </div>
+</section>
+
+<section id="wheelScreen" class="screen overflow-auto bg-pink-50">
+  <div class="max-w-md mx-auto w-full flex flex-col gap-6 items-center py-6">
+    
+    <div class="flex flex-col items-center order-1">
+      <div class="wheel-stage mb-6">
+        <div class="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
+          <i class="ri-arrow-down-s-fill text-5xl text-rose-500 drop-shadow-md"></i>
+        </div>
+        <canvas id="wheelCanvas" width="320" height="320" class="drop-shadow-xl max-w-full"></canvas>
+      </div>
+      
+      <button id="spinBtn" class="px-16 py-5 rounded-full btn-rose text-lg shadow-lg active:scale-95 transition">
+        SPIN FOR LOVE 🌸
+      </button>
+    </div>
+
+    <div class="glass-panel p-6 w-full order-2">
+      <div class="flex items-center gap-3 mb-4 justify-center">
+        <i class="ri-hearts-line text-2xl text-rose-400"></i>
+        <h2 class="text-2xl text-rose-700">Romantic Possibilities</h2>
+      </div>
+      
+      <div class="space-y-4">
+        <div>
+          <input id="titleInput" class="w-full p-3 rounded-xl input-soft text-center" placeholder="e.g. A Surprise Date">
+        </div>
+        <div>
+          <textarea id="descInput" class="w-full p-3 rounded-xl input-soft text-center" rows="2" placeholder="What wonderful thing happens?"></textarea>
+        </div>
+        <button id="addEntryBtn" class="w-full py-3 bg-white/50 text-rose-500 border-2 border-pink-200 rounded-xl transition font-bold uppercase text-xs hover:bg-white">
+          + Add Possibility
+        </button>
+      </div>
+
+      <div class="mt-4 border-t border-pink-100 pt-2">
+        <div id="entryList" class="space-y-2 max-h-[120px] overflow-y-auto pr-2 custom-scroll">
+          </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="resultBox" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-pink-900/20 backdrop-blur-sm">
+    <div class="glass-panel p-8 w-full max-w-sm text-center animate-[fadeInUp_0.4s_ease-out]">
+      <div class="text-rose-400 text-3xl mb-2">💝</div>
+      <h3 id="resultTitle" class="text-3xl font-bold text-rose-700 mb-3"></h3>
+      <p id="resultDesc" class="text-rose-800 text-lg font-medium leading-relaxed"></p>
+      <button onclick="$('resultBox').classList.add('hidden')" class="mt-6 px-8 py-3 bg-pink-100 text-rose-500 rounded-full text-sm font-bold">Close</button>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ---------- AUDIO ENGINE (Soft & Sparkly) ---------- */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  const now = audioCtx.currentTime;
+
+  if (type === 'pop') {
+    // Higher, gentler pop
+    osc.frequency.setValueAtTime(500, now);
+    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.15);
+    osc.start(); osc.stop(now + 0.15);
+  } else if (type === 'hit') {
+    // Sparkle sound
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(800, now);
+    osc.frequency.linearRampToValueAtTime(1200, now + 0.1);
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.1);
+    osc.start(); osc.stop(now + 0.1);
+  } else if (type === 'explosion') {
+    // Magical swoosh instead of harsh explosion
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.exponentialRampToValueAtTime(100, now + 1);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 1);
+    osc.start(); osc.stop(now + 1);
+    confetti('#ec4899'); // Extra confetti on win
+  }
+}
+
+/* ---------- NAV & LOGIC ---------- */
+const show = id => document.querySelectorAll('.screen').forEach(s => s.style.display = s.id === id ? 'flex' : 'none');
+const $ = id => document.getElementById(id);
+
+// Intro - Manual fallback included
+$('introVideo').onended = () => { show("message"); setTimeout(() => show("uploadScreen"), 3500) };
+setTimeout(() => { if($('intro').style.display !== 'none') { show("message"); setTimeout(() => show("uploadScreen"), 3500) } }, 6000);
+
+$('uploadBtn').onclick = () => $('upload').click();
+let images = [], imgIndex = 0;
+$('upload').onchange = e => { if(e.target.files.length) { images = [...e.target.files]; show("balloonScreen"); } }
+
+$('balloon').onclick = () => {
+  playSound('pop');
+  $('img').src = URL.createObjectURL(images[imgIndex]);
+  show("imageScreen");
+}
+
+$('imageScreen').onclick = () => {
+  imgIndex++;
+  imgIndex < images.length ? show("balloonScreen") : show("crystalScreen");
+}
+
+$('revealBtn').onclick = () => {
+  $('crystalInput').style.display = "none";
+  let t = $('userText').value || "Love is on its way to you.";
+  let i = 0;
+  $('futureText').textContent = "";
+  let timer = setInterval(() => {
+    $('futureText').textContent += t[i++];
+    if(i >= t.length) { clearInterval(timer); setTimeout(() => show("shooterSetup"), 2500); }
+  }, 50);
+}
+
+/* ---------- SHOOTER (Breakthrough) ---------- */
+let gameLoop, bossHp = 100, bossX = 50, bossY = 100, velX = 2.5, velY = 2;
+
+$('uploadHateBtn').onclick = () => $('hateUpload').click();
+$('skipGameBtn').onclick = () => show("wheelScreen");
+
+$('hateUpload').onchange = (e) => {
+  if (e.target.files[0]) initGame(URL.createObjectURL(e.target.files[0]));
+}
+
+function initGame(src) {
+  show("shooterGame");
+  $('gameArea').innerHTML = ''; 
+  bossHp = 100;
+  $('bossHpBar').style.width = '100%';
+  $('hpText').innerText = '100%';
+  $('winMessage').style.display = 'none';
+
+  const boss = document.createElement('div');
+  boss.className = 'boss-container';
+  boss.id = 'boss';
+  boss.innerHTML = `<div class="boss-ring"></div><img src="${src}" class="boss-img">`;
+  $('gameArea').appendChild(boss);
+  
+  // Reset position
+  bossX = window.innerWidth/2 - 90; bossY = 100;
+
+  gameLoop = requestAnimationFrame(updateGame);
+  $('gameArea').ontouchstart = $('gameArea').onmousedown = (e) => {
+      e.preventDefault(); // Prevent scrolling on touch
+      handleShot(e.touches ? e.touches[0] : e, boss);
+  };
+}
+
+function updateGame() {
+  const boss = $('boss');
+  if(!boss) return;
+  const area = $('gameArea');
+  const maxX = area.clientWidth - 180;
+  const maxY = area.clientHeight - 180;
+
+  bossX += velX; bossY += velY;
+  if(bossX <= 0 || bossX >= maxX) velX *= -1;
+  if(bossY <= 0 || bossY >= maxY) velY *= -1;
+
+  boss.style.transform = `translate(${bossX}px, ${bossY}px)`;
+  if(bossHp > 0) gameLoop = requestAnimationFrame(updateGame);
+}
+
+function handleShot(e, boss) {
+  const rect = boss.getBoundingClientRect();
+  const hit = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+
+  if (hit && bossHp > 0) {
+    bossHp -= 10; 
+    playSound('hit');
+    
+    $('bossHpBar').style.width = bossHp + '%';
+    $('hpText').innerText = Math.max(0, Math.floor(bossHp)) + '%';
+    
+    spawnDamage(e.clientX, e.clientY);
+    
+    const stage = $('shooterGame');
+    stage.classList.remove('shake-hard');
+    void stage.offsetWidth;
+    stage.classList.add('shake-hard');
+
+    velX *= 1.1; velY *= 1.1; 
+    
+    if (bossHp <= 0) endGame(boss);
+  }
+}
+
+function spawnDamage(x, y) {
+  const t = document.createElement('div');
+  t.className = 'damage-float'; t.innerHTML = "❤"; // Heart instead of number
+  t.style.left = (x-15) + 'px'; t.style.top = (y - 40) + 'px';
+  $('gameArea').appendChild(t);
+  setTimeout(() => t.remove(), 800);
+}
+
+function endGame(boss) {
+  cancelAnimationFrame(gameLoop);
+  playSound('explosion');
+  
+  boss.style.transition = 'all 1s ease';
+  boss.style.transform += ' scale(1.5)';
+  boss.style.opacity = '0';
+  
+  setTimeout(() => {
+    boss.remove();
+    $('winMessage').style.display = 'flex';
+  }, 800);
+}
+
+$('finishGameBtn').onclick = () => show("wheelScreen");
+
+/* ---------- WHEEL LOGIC (Soft Palette) ---------- */
+const canvas = $('wheelCanvas');
+const ctx = canvas.getContext("2d");
+let entries = [], wAngle = 0;
+// Romantic Palette
+const colors = ["#fce7f3", "#fbcfe8", "#f9a8d4", "#f472b6", "#fda4af"];
+
+function drawWheel() {
+  const size = canvas.width; const cx = size/2, cy = size/2, r = size/2 - 10;
+  ctx.clearRect(0,0,size,size);
+  
+  if(!entries.length) {
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI); 
+    ctx.strokeStyle="rgba(236, 72, 153, 0.2)"; ctx.lineWidth=8; ctx.stroke(); 
+    return;
+  }
+  
+  const slice = (Math.PI*2)/entries.length;
+  entries.forEach((e, i) => {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, wAngle + i*slice, wAngle + (i+1)*slice);
+    ctx.fillStyle = colors[i%colors.length];
+    ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.stroke();
+    
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(wAngle + (i+0.5)*slice);
+    ctx.fillStyle = "#be185d"; 
+    ctx.font = "500 14px Montserrat";
+    ctx.fillText(e.title, r/2, 5);
+    ctx.restore();
+  });
+  
+  // Center Heart
+  ctx.beginPath(); ctx.arc(cx, cy, 20, 0, 2*Math.PI); 
+  ctx.fillStyle="#fff"; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, cy, 12, 0, 2*Math.PI); 
+  ctx.fillStyle="#ec4899"; ctx.fill();
+}
+// Initial draw based on canvas size
+drawWheel();
+
+$('addEntryBtn').onclick = () => {
+  const t = $('titleInput').value, d = $('descInput').value;
+  if(t && d) {
+    entries.push({title: t, desc: d});
+    $('titleInput').value = ""; $('descInput').value = "";
+    $('entryList').innerHTML = entries.map(e => `
+      <div class="bg-pink-100/50 p-2 rounded-lg flex justify-between items-center">
+        <span class="text-sm font-medium text-rose-700">${e.title}</span>
+        <i class="ri-heart-fill text-rose-300"></i>
+      </div>`).join("");
+    drawWheel();
+  }
+}
+
+$('spinBtn').onclick = () => {
+  if(entries.length < 2) return;
+  let speed = 0.6, decel = 0.002;
+  const spin = setInterval(() => {
+    wAngle += speed; speed -= decel;
+    drawWheel();
+    if(speed <= 0) {
+      clearInterval(spin);
+      const slice = (Math.PI*2)/entries.length;
+      const idx = Math.floor(((Math.PI*2 - (wAngle % (Math.PI*2))) + Math.PI*1.5) / slice) % entries.length;
+      const win = entries[idx] || entries[0];
+      $('resultTitle').innerText = win.title;
+      $('resultDesc').innerText = win.desc;
+      $('resultBox').classList.remove('hidden');
+      confetti('#ec4899');
+    }
+  }, 16);
+}
+
+function confetti(color){
+  const icons=["💖","🌸","✨","💌"];
+  for(let i=0;i<50;i++){
+    const c=document.createElement("div");
+    c.className="confetti";
+    c.textContent=icons[Math.floor(Math.random()*icons.length)];
+    c.style.left=Math.random()*100+"%";
+    c.style.fontSize=Math.random()*20+15+"px";
+    c.style.color=color;
+    c.style.animationDuration = (Math.random()*2 + 2) + "s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+</script>
+</body>
+</html>

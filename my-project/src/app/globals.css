@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Gradient Background */
+.gradient-bg {
+  background: linear-gradient(
+    135deg,
+    #ffeef8 0%,
+    #f3e8ff 25%,
+    #e0f2fe 50%,
+    #fef3e2 75%,
+    #ffeef8 100%
+  );
+}
+
+/* Glass Effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}

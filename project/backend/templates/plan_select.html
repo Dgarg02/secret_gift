@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Your Journey | SecretGift</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          animation: {
+            'blob': 'blob 10s infinite',
+            'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'border-spin': 'borderSpin 3s linear infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            borderSpin: {
+              '0%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' },
+              '100%': { backgroundPosition: '0% 50%' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      transition: background-color .5s ease, color .5s ease;
+    }
+
+    /* Noise Texture Overlay */
+    .noise-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    html.dark .glass {
+      background: rgba(18, 18, 18, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Living Gradient Border */
+    .gradient-border {
+      position: relative;
+      background: linear-gradient(60deg, #a855f7, #ec4899, #f97316, #a855f7);
+      background-size: 300% 300%;
+      animation: borderSpin 4s ease infinite;
+    }
+  </style>
+</head>
+
+<body class="bg-[#F8F7F4] dark:bg-[#050505] text-slate-800 dark:text-gray-200 min-h-screen relative overflow-x-hidden flex flex-col">
+
+<div class="noise-bg filter contrast-100 brightness-100 dark:brightness-150"></div>
+
+<div class="fixed inset-0 overflow-hidden pointer-events-none -z-20">
+  <div class="absolute top-0 left-1/4 w-96 h-96 bg-purple-300 dark:bg-purple-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-40 animate-blob"></div>
+  <div class="absolute top-0 right-1/4 w-96 h-96 bg-pink-300 dark:bg-pink-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+  <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-orange-200 dark:bg-indigo-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+</div>
+
+<nav class="absolute top-0 inset-x-0 z-50 p-6">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <a href="/" class="flex items-center gap-2 group">
+        <span class="text-2xl group-hover:rotate-12 transition-transform duration-300">🎁</span>
+        <span class="font-bold text-lg tracking-tight">SecretGift</span>
+    </a>
+    <div class="flex gap-4">
+        <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 hover:scale-105 transition">
+            <i class="ph ph-moon text-xl dark:hidden"></i>
+            <i class="ph ph-sun text-xl hidden dark:block"></i>
+        </button>
+    </div>
+  </div>
+</nav>
+
+<main class="flex-grow flex items-center justify-center px-4 py-24">
+  <div class="max-w-5xl mx-auto w-full animate-fade-in">
+
+    <div class="text-center mb-16">
+      <div class="inline-block mb-3 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 text-xs font-semibold tracking-wider uppercase">
+        Step 2 of 3
+      </div>
+      <h1 class="font-serif text-4xl md:text-6xl mb-6">
+        Choose your <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-500 italic">Experience</span>
+      </h1>
+      <p class="opacity-70 text-lg max-w-xl mx-auto leading-relaxed">
+        Select how you want your story to unfold. 
+        <br class="hidden md:block">Will it be a moment, or a journey?
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8 items-stretch">
+
+      <div class="group relative flex flex-col h-full hover:-translate-y-2 transition-transform duration-500">
+        <div class="glass rounded-[2rem] p-8 md:p-10 flex flex-col h-full relative overflow-hidden">
+            
+            <div class="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 dark:text-gray-400 mb-6 group-hover:text-purple-500 transition-colors">
+                <i class="ph-duotone ph-star text-3xl"></i>
+            </div>
+
+            <h2 class="font-serif text-3xl mb-2">Single Spark</h2>
+            <p class="opacity-60 text-sm leading-relaxed mb-6">
+                A single, beautifully crafted interactive moment. Perfect for a quick surprise.
+            </p>
+
+            <div class="mt-auto pt-6 border-t border-gray-100 dark:border-white/5">
+                <div class="flex items-baseline gap-1 mb-6">
+                    <span class="text-4xl font-serif">₹99</span>
+                </div>
+
+                <ul class="space-y-3 mb-8 text-sm opacity-80">
+                    <li class="flex items-center gap-3">
+                        <i class="ph-fill ph-check-circle text-gray-300 group-hover:text-purple-400 transition-colors"></i> 1 Interactive Scene
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <i class="ph-fill ph-check-circle text-gray-300 group-hover:text-purple-400 transition-colors"></i> Standard Image Quality
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <i class="ph-fill ph-check-circle text-gray-300 group-hover:text-purple-400 transition-colors"></i> Password Protection
+                    </li>
+                </ul>
+
+                <button onclick="selectPlan('individual')" class="w-full py-4 rounded-xl border border-gray-200 dark:border-white/10 font-medium hover:border-purple-500 hover:text-purple-500 dark:hover:text-purple-400 transition-all duration-300 bg-white/50 dark:bg-black/20">
+                    Select Single
+                </button>
+            </div>
+        </div>
+      </div>
+
+      <div class="group relative flex flex-col h-full hover:-translate-y-2 transition-transform duration-500">
+        
+        <div class="absolute -inset-[2px] rounded-[2.1rem] gradient-border blur-sm opacity-70 group-hover:opacity-100 transition-opacity duration-500"></div>
+        
+        <div class="glass rounded-[2rem] p-8 md:p-10 flex flex-col h-full relative z-10 bg-white/90 dark:bg-[#0f0f0f]/90">
+            
+            <div class="absolute -top-3 right-6">
+                <div class="bg-gradient-to-r from-purple-600 to-pink-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-purple-500/30 flex items-center gap-1">
+                    <i class="ph-fill ph-crown"></i> Best Value
+                </div>
+            </div>
+
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center text-purple-600 dark:text-pink-400 mb-6 group-hover:scale-110 transition-transform duration-500">
+                <i class="ph-duotone ph-sparkle text-3xl"></i>
+            </div>
+
+            <h2 class="font-serif text-3xl mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-500">Full Experience</h2>
+            <p class="opacity-60 text-sm leading-relaxed mb-6">
+                A cinematic journey through 5 connected love languages. The ultimate emotional impact.
+            </p>
+
+            <div class="mt-auto pt-6 border-t border-purple-100 dark:border-white/10">
+                <div class="flex items-baseline gap-2 mb-6">
+                    <span class="text-4xl font-serif">₹499</span>
+                    <span class="text-sm line-through opacity-40">₹899</span>
+                </div>
+
+                <ul class="space-y-3 mb-8 text-sm">
+                    <li class="flex items-center gap-3">
+                        <div class="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center text-green-500"><i class="ph-bold ph-check text-xs"></i></div>
+                        <span class="font-medium">All 5 Premium Scenes</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <div class="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center text-green-500"><i class="ph-bold ph-check text-xs"></i></div>
+                        Connected Story Narrative
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <div class="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center text-green-500"><i class="ph-bold ph-check text-xs"></i></div>
+                        4K Image Support
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <div class="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center text-green-500"><i class="ph-bold ph-check text-xs"></i></div>
+                        Forever Access
+                    </li>
+                </ul>
+
+                <button onclick="selectPlan('combo')" class="group/btn relative w-full py-4 rounded-xl font-bold text-white shadow-xl shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 group-hover/btn:animate-border-spin bg-[length:200%_200%]"></div>
+                    <span class="relative flex items-center justify-center gap-2">
+                        Unlock Magic <i class="ph-bold ph-arrow-right"></i>
+                    </span>
+                </button>
+            </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  // --- Auth & Data Check ---
+  const draftGift = localStorage.getItem("draftGift");
+  
+  // Optional: Redirect if no draft (Commented out for testing)
+  // if (!draftGift) window.location.href = "/create.html";
+
+  // --- Logic ---
+  function selectPlan(plan) {
+    localStorage.setItem("selectedPlan", plan);
+
+    const price = plan === "individual" ? "99" : "499";
+    localStorage.setItem("amount", price);
+
+    if (draftGift) {
+        let giftData = JSON.parse(draftGift);
+        giftData.plan = plan;
+        giftData.price = price;
+        localStorage.setItem("draftGift", JSON.stringify(giftData));
+    }
+
+    if (plan === "individual") {
+      window.location.href = "/select-theme"; // Route to theme selection
+    } else {
+      window.location.href = "/payment.html"; // Route directly to payment
+    }
+  }
+
+  // --- Theme Sync ---
+  const root = document.documentElement;
+  const initialTheme = localStorage.getItem("theme") || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  root.className = initialTheme;
+
+  function toggleTheme() {
+    const isDark = root.classList.contains('dark');
+    root.className = isDark ? 'light' : 'dark';
+    localStorage.setItem("theme", isDark ? 'light' : 'dark');
+  }
+</script>
+
+</body>
+</html>

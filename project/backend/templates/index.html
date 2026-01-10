@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SecretGift ✨ | Send Emotions Securely</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function handleCreateClick(event) {
+      // You can add any pre-navigation logic here if needed
+
+      const isloggedIn = localStorage.getItem("isAuthenticated")==="true";
+      console.log("User is logged in, navigating to /create");
+      console.log("isloggedIn:", isloggedIn);
+      if (isloggedIn) {
+        
+        window.location.href = '/create';
+      }
+      else {
+        localStorage.setItem("redirectAfterLogin", "/create");
+        window.location.href = '/login';
+      }
+      // For now, it just navigates to the /create page
+    }
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #d8b4fe 0%, #f9a8d4 100%);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      background-color: #fdf4ff;
+    }
+
+    /* --- Animated Background Blobs --- */
+    .blob-cont {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.6;
+      animation: float-blob 20s infinite alternate;
+    }
+
+    .blob-1 { background: #e0c3fc; width: 500px; height: 500px; top: -100px; left: -100px; }
+    .blob-2 { background: #ffd1ff; width: 400px; height: 400px; bottom: -50px; right: -50px; animation-delay: -5s; }
+    .blob-3 { background: #c7d2fe; width: 300px; height: 300px; top: 40%; left: 40%; animation-delay: -10s; }
+
+    @keyframes float-blob {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, 50px) scale(1.1); }
+    }
+
+    /* --- Premium Glass Effect --- */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .glass-card:hover {
+      transform: translateY(-8px);
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 20px 40px rgba(168, 85, 247, 0.15);
+      border-color: rgba(232, 121, 249, 0.3);
+    }
+
+    /* --- Animations --- */
+    .floating-heart {
+      position: absolute;
+      pointer-events: none;
+      animation: floatUp linear forwards;
+      opacity: 0;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+      10% { opacity: 0.8; }
+      100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+    }
+
+    /* Scroll Reveal Classes */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease-out;
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Text Gradient */
+    .text-gradient {
+      background: linear-gradient(to right, #9333ea, #db2777);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    /* Button Glow */
+    .btn-glow {
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-glow::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: 0.5s;
+    }
+    .btn-glow:hover::after {
+      left: 100%;
+    }
+  </style>
+</head>
+
+<body class="text-slate-800 antialiased selection:bg-fuchsia-200 selection:text-fuchsia-900">
+
+  <div class="blob-cont">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div id="hearts-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+  <nav class="fixed top-0 w-full z-50 transition-all duration-300" id="navbar">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 group">
+        <span class="text-3xl transition-transform group-hover:scale-110">🎁</span>
+        <span class="font-bold text-xl tracking-tight text-slate-800 group-hover:text-fuchsia-700 transition-colors">SecretGift</span>
+      </a>
+      
+      <div class="hidden md:flex gap-8 text-sm font-semibold text-slate-600">
+        <a href="#how" class="hover:text-fuchsia-600 transition-colors">How it Works</a>
+        <a href="#about" class="hover:text-fuchsia-600 transition-colors">About</a>
+        <a href="#examples" class="hover:text-fuchsia-600 transition-colors">Inspiration</a>
+      </div>
+
+      <a href="#" onclick="handleCreateClick(event)" class="hidden md:inline-block px-6 py-2.5 rounded-full bg-white/80 border border-white/50 text-fuchsia-700 font-bold shadow-sm hover:shadow-md hover:scale-105 transition-all backdrop-blur-sm">
+        Create Gift
+      </a>
+    </div>
+  </nav>
+
+  <main class="relative z-10 pt-40 pb-20 px-6">
+    <section class="max-w-4xl mx-auto text-center">
+      <div class="reveal">
+        <span class="inline-block py-1 px-3 rounded-full bg-fuchsia-100 border border-fuchsia-200 text-fuchsia-700 text-xs font-bold uppercase tracking-wider mb-6 animate-pulse">
+          ✨ The most thoughtful digital gift
+        </span>
+        
+        <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-8 text-slate-900">
+          Make Someone <br />
+          <span class="text-gradient">Smile Today.</span>
+        </h1>
+        
+        <p class="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+          Create a private, password-protected website just for them. 
+          Combine your words, memories, and photos into a digital surprise 
+          that lasts forever.
+        </p>
+
+        <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+          <a href="#" onclick="handleCreateClick(event)" class="btn-glow group relative px-8 py-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 transition-all w-full md:w-auto">
+            Create Secret Gift
+            <span class="inline-block ml-2 transition-transform group-hover:translate-x-1">→</span>
+          </a>
+          <a href="#how" class="px-8 py-4 rounded-full bg-white/50 text-slate-700 font-bold hover:bg-white hover:text-purple-600 transition-all w-full md:w-auto">
+            See Demo
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="reveal max-w-5xl mx-auto mt-20">
+      <div class="glass-panel rounded-2xl p-8 md:p-10 flex flex-col md:flex-row justify-around items-center text-center gap-8">
+        <div>
+          <div class="text-3xl font-bold text-slate-800">10k+</div>
+          <div class="text-sm text-slate-500 font-medium">Gifts Created</div>
+        </div>
+        <div class="w-full h-px md:w-px md:h-12 bg-slate-300/50"></div>
+        <div>
+          <div class="text-3xl font-bold text-slate-800">100%</div>
+          <div class="text-sm text-slate-500 font-medium">Private & Secure</div>
+        </div>
+        <div class="w-full h-px md:w-px md:h-12 bg-slate-300/50"></div>
+        <div>
+          <div class="text-3xl font-bold text-slate-800">Free</div>
+          <div class="text-sm text-slate-500 font-medium">Forever</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <section id="how" class="relative z-10 py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16 reveal">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-900">How it Works</h2>
+        <p class="text-slate-500">Three simple steps to create a magical moment.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="glass-card rounded-3xl p-8 reveal" style="transition-delay: 100ms;">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center text-3xl mb-6 shadow-sm">
+            ✍️
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-slate-800">1. Write from the Heart</h3>
+          <p class="text-slate-600 leading-relaxed">
+            Pour your feelings into a digital letter. Add photos, pick a theme, and customize the experience to match their vibe.
+          </p>
+        </div>
+
+        <div class="glass-card rounded-3xl p-8 reveal" style="transition-delay: 200ms;">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center text-3xl mb-6 shadow-sm">
+            🔐
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-slate-800">2. Lock with a Password</h3>
+          <p class="text-slate-600 leading-relaxed">
+            Set a secret password (like their nickname or a special date) so only the intended person can unlock the gift.
+          </p>
+        </div>
+
+        <div class="glass-card rounded-3xl p-8 reveal" style="transition-delay: 300ms;">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center text-3xl mb-6 shadow-sm">
+            💌
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-slate-800">3. Send the Link</h3>
+          <p class="text-slate-600 leading-relaxed">
+            Share the unique link via WhatsApp or DM. Watch their reaction as they unlock your beautiful surprise.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="examples" class="relative z-10 py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="glass-panel rounded-[2.5rem] p-10 md:p-16 text-center reveal">
+        <h2 class="text-3xl md:text-4xl font-bold mb-10 text-slate-900">Perfect for every emotion</h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
+          <div class="p-4 rounded-2xl bg-white/40 hover:bg-white/70 transition cursor-default">
+            <div class="text-3xl mb-2">❤️</div>
+            <div class="font-bold text-slate-700">Confessions</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/40 hover:bg-white/70 transition cursor-default">
+            <div class="text-3xl mb-2">🎂</div>
+            <div class="font-bold text-slate-700">Birthdays</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/40 hover:bg-white/70 transition cursor-default">
+            <div class="text-3xl mb-2">💍</div>
+            <div class="font-bold text-slate-700">Proposals</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/40 hover:bg-white/70 transition cursor-default">
+            <div class="text-3xl mb-2">🩹</div>
+            <div class="font-bold text-slate-700">Apologies</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/40 hover:bg-white/70 transition cursor-default">
+            <div class="text-3xl mb-2">🙏</div>
+            <div class="font-bold text-slate-700">Gratitude</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/40 hover:bg-white/70 transition cursor-default">
+            <div class="text-3xl mb-2">🚀</div>
+            <div class="font-bold text-slate-700">Good Luck</div>
+          </div>
+        </div>
+
+        <div class="mt-12">
+          <a href="/create" class="inline-flex items-center font-bold text-fuchsia-600 hover:text-fuchsia-800 transition">
+            Start creating your gift <span class="ml-2 text-xl">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="relative z-10 py-12 text-center text-slate-500 text-sm">
+    <div class="flex justify-center gap-8 mb-6 font-medium">
+      <a href="#" class="hover:text-fuchsia-600 transition">Privacy</a>
+      <a href="#" class="hover:text-fuchsia-600 transition">Terms</a>
+      <a href="#" class="hover:text-fuchsia-600 transition">Contact</a>
+    </div>
+    <p>© 2025 SecretGift. Made with 💗 in the cloud.</p>
+  </footer>
+
+  <script>
+    // --- 1. Navbar Glass Effect on Scroll ---
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        navbar.classList.add('bg-white/70', 'backdrop-blur-md', 'shadow-sm');
+      } else {
+        navbar.classList.remove('bg-white/70', 'backdrop-blur-md', 'shadow-sm');
+      }
+    });
+
+    // --- 2. Scroll Reveal Animation (Intersection Observer) ---
+    const revealElements = document.querySelectorAll('.reveal');
+
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          observer.unobserve(entry.target); // Only animate once
+        }
+      });
+    }, {
+      root: null,
+      threshold: 0.15, // Trigger when 15% visible
+    });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+
+    // --- 3. Dynamic Floating Hearts ---
+    function createHeart() {
+      const heart = document.createElement('div');
+      const emojis = ['💖', '💗', '💜', '✨', '🌸'];
+      heart.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+      heart.classList.add('floating-heart');
+      
+      // Random Positioning
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.animationDuration = Math.random() * 3 + 4 + 's'; // 4s to 7s
+      heart.style.fontSize = Math.random() * 20 + 10 + 'px'; // 10px to 30px
+      
+      document.getElementById('hearts-container').appendChild(heart);
+
+      // Remove after animation
+      setTimeout(() => {
+        heart.remove();
+      }, 7000);
+    }
+
+    // Create a heart every 800ms
+    setInterval(createHeart, 800);
+  </script>
+</body>
+</html>

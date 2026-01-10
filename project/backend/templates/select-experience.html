@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Theme | SecretGift</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          animation: {
+            'blob': 'blob 10s infinite',
+            'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      transition: background-color .5s ease, color .5s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Noise Texture */
+    .noise-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Glass Card Style */
+    .glass {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    html.dark .glass {
+      background: rgba(20, 20, 20, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Card Interaction States */
+    .theme-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 15px 30px -10px rgba(168, 85, 247, 0.15); /* Purple shadow */
+    }
+
+    /* Selected State */
+    .theme-card.active {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: #a855f7; /* Purple-500 */
+      transform: scale(1.02);
+      box-shadow: 0 0 0 2px #a855f7, 0 10px 40px -10px rgba(168, 85, 247, 0.3);
+    }
+    html.dark .theme-card.active {
+      background: rgba(30, 30, 30, 0.9);
+      border-color: #d8b4fe;
+      box-shadow: 0 0 0 2px #d8b4fe, 0 10px 40px -10px rgba(168, 85, 247, 0.2);
+    }
+
+    /* Radio Indicator */
+    .radio-circle {
+      transition: all 0.3s ease;
+      border: 1.5px solid rgba(156, 163, 175, 0.5);
+    }
+    .theme-card.active .radio-circle {
+      border-color: #a855f7;
+      background: #a855f7;
+    }
+    .radio-check { transform: scale(0); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .theme-card.active .radio-check { transform: scale(1); }
+
+  </style>
+</head>
+
+<body class="bg-[#F8F7F4] dark:bg-[#050505] text-slate-800 dark:text-gray-200 min-h-screen relative overflow-x-hidden flex flex-col">
+
+<div class="noise-bg filter contrast-100 brightness-100 dark:brightness-150"></div>
+
+<div class="fixed inset-0 overflow-hidden pointer-events-none -z-20">
+  <div class="absolute top-0 left-1/4 w-96 h-96 bg-purple-300 dark:bg-purple-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-40 animate-blob"></div>
+  <div class="absolute top-0 right-1/4 w-96 h-96 bg-pink-300 dark:bg-pink-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+  <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-orange-200 dark:bg-indigo-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+</div>
+
+<nav class="fixed top-0 inset-x-0 z-40 p-6 bg-gradient-to-b from-[#F8F7F4] dark:from-[#050505] to-transparent">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <a href="/plan-select.html" class="flex items-center gap-2 group text-sm font-medium opacity-60 hover:opacity-100 transition-opacity">
+        <i class="ph-bold ph-arrow-left"></i> Back to Plans
+    </a>
+    <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 hover:scale-105 transition">
+        <i class="ph ph-moon text-xl dark:hidden"></i>
+        <i class="ph ph-sun text-xl hidden dark:block"></i>
+    </button>
+  </div>
+</nav>
+
+<main class="flex-grow flex items-center justify-center px-6 pt-28 pb-32">
+  <div class="max-w-7xl mx-auto w-full animate-fade-in">
+
+    <div class="text-center mb-12">
+      <div class="inline-block mb-3 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 text-xs font-semibold tracking-wider uppercase">
+        Step 3 of 3
+      </div>
+      <h1 class="font-serif text-3xl md:text-5xl mb-4">
+        Choose your <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-500 italic">Visual Theme</span>
+      </h1>
+      <p class="opacity-60 text-lg max-w-lg mx-auto">
+        Select the atmosphere for your digital surprise.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="themeGrid">
+        </div>
+
+  </div>
+</main>
+
+<div id="actionBar" class="fixed bottom-6 inset-x-0 z-50 transform translate-y-[200%] transition-transform duration-500 ease-out pointer-events-none">
+  <div class="max-w-xl mx-auto pointer-events-auto">
+    <div class="glass bg-white/90 dark:bg-[#151515]/90 rounded-full p-2 pl-8 shadow-2xl flex items-center justify-between">
+        
+        <div class="flex flex-col">
+            <span class="text-[10px] uppercase tracking-wider opacity-50">Selected Theme</span>
+            <span id="selectedNameDisplay" class="font-serif text-lg text-purple-600 dark:text-purple-400 font-medium">None</span>
+        </div>
+
+        <button onclick="proceed()" 
+                class="px-8 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+            Finish <i class="ph-bold ph-check"></i>
+        </button>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- DATA ---
+  const themes = [
+    {
+        id: 'magic-opening',
+        image: 'https://images.unsplash.com/photo-1515966097209-ec48fdbbec6d?q=80&w=1000&auto=format&fit=crop', // Sparkles/Magic
+        title: 'Magic Reveal',
+        desc: 'Cinematic particles and golden light.'
+    },
+    {
+        id: 'balloon-pop',
+        image: 'https://images.unsplash.com/photo-1574625881457-37dfd0a4a83d?q=80&w=1000&auto=format&fit=crop', // Balloons
+        title: 'Balloon Pop',
+        desc: 'Playful floating balloons to pop.'
+    },
+    {
+        id: 'mystic-orb',
+        image: 'https://images.unsplash.com/photo-1557409518-691ebcd96038?q=80&w=1000&auto=format&fit=crop', // Fog/Crystal
+        title: 'Mystic Orb',
+        desc: 'A mysterious fog reveals your destiny.'
+    },
+    {
+        id: 'shooter-game',
+        image: 'https://images.unsplash.com/photo-1506199427389-9a6472d42d3e?q=80&w=1000&auto=format&fit=crop', // Target/Love
+        title: 'Love Archer',
+        desc: 'Gamified heart-target experience.'
+    },
+    {
+        id: 'spin-wheel',
+        image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=1000&auto=format&fit=crop', // Carnival
+        title: 'Fate Wheel',
+        desc: 'Spin the wheel to decide your future.'
+    }
+  ];
+
+  // --- RENDER GRID ---
+  const grid = document.getElementById('themeGrid');
+  
+  themes.forEach(theme => {
+    const card = document.createElement('div');
+    card.className = `glass theme-card rounded-[2rem] p-4 cursor-pointer group flex flex-col relative h-full`;
+    card.id = `card-${theme.id}`;
+    card.onclick = () => selectTheme(theme.id);
+
+    card.innerHTML = `
+        <div class="relative h-56 rounded-[1.5rem] overflow-hidden mb-4">
+            <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10"></div>
+            
+            <div class="absolute top-3 right-3 z-20">
+                <div class="radio-circle w-8 h-8 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur flex items-center justify-center">
+                    <i class="ph-bold ph-check text-white radio-check"></i>
+                </div>
+            </div>
+
+            <img src="${theme.image}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+        </div>
+
+        <div class="px-2 pb-2">
+            <h3 class="font-serif text-2xl mb-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">${theme.title}</h3>
+            <p class="text-sm opacity-60 leading-relaxed">${theme.desc}</p>
+        </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // --- LOGIC ---
+  let selectedId = null;
+
+  function selectTheme(id) {
+    const actionBar = document.getElementById('actionBar');
+    const nameDisplay = document.getElementById('selectedNameDisplay');
+
+    // Deselect Logic (Swap behavior)
+    if (selectedId && selectedId !== id) {
+        document.getElementById(`card-${selectedId}`).classList.remove('active');
+    }
+    
+    selectedId = id;
+    const currentCard = document.getElementById(`card-${id}`);
+    
+    // Animate Selection
+    currentCard.classList.add('active');
+
+    // Update Text
+    const themeObj = themes.find(t => t.id === id);
+    nameDisplay.innerText = themeObj.title;
+
+    // Show Action Bar
+    actionBar.classList.remove('translate-y-[200%]');
+  }
+
+  function proceed() {
+    if (!selectedId) return;
+    localStorage.setItem("selectedExperience", selectedId);
+    
+    // Update Draft
+    const draftGift = localStorage.getItem("draftGift");
+    if (draftGift) {
+        let giftData = JSON.parse(draftGift);
+        giftData.theme = selectedId;
+        localStorage.setItem("draftGift", JSON.stringify(giftData));
+    }
+    window.location.href = "/payment";
+  }
+
+  // --- THEME SYNC ---
+  const root = document.documentElement;
+  const initialTheme = localStorage.getItem("theme") || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  root.className = initialTheme;
+
+  function toggleTheme() {
+    const isDark = root.classList.contains('dark');
+    root.className = isDark ? 'light' : 'dark';
+    localStorage.setItem("theme", isDark ? 'light' : 'dark');
+  }
+</script>
+
+</body>
+</html>
