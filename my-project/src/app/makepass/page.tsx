@@ -1,30 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // 1. Import Router
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Lock, Key, MessageCircle, Sparkles, Check, 
-  ArrowRight, ArrowLeft, Star, Gift, CheckCircle2, Crown, Type 
+import {
+  ArrowRight, ArrowLeft, Gift, Key, Type, Sparkles,
+  Lock, Unlock, Heart, Crown, PartyPopper, Check
 } from "lucide-react";
 
 export default function MakePass() {
-  const router = useRouter(); // 2. Initialize Router
-  
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
-  
+  const [isUnlocked, setIsUnlocked] = useState(false);
+
   const [formData, setFormData] = useState({
     title: "",
     password: "",
     hint: "",
     message: "",
-    plan: "magic"
+    // ✅ CHANGED: Default to basic_reveal since magic is disabled
+    plan: "basic_reveal" as "basic_reveal" | "magic_experience",
   });
 
-  // --- VALIDATION LOGIC ---
+  // Watch password to toggle "Unlock" visual
+  useEffect(() => {
+    setIsUnlocked(formData.password.length > 0);
+  }, [formData.password]);
+
+  /* ---------------- VALIDATION ---------------- */
   const isStepValid = () => {
-    switch(step) {
+    switch (step) {
       case 1: return formData.title.trim().length > 0;
       case 2: return formData.password.trim().length > 0;
       case 3: return formData.message.trim().length > 0;
@@ -32,7 +38,7 @@ export default function MakePass() {
     }
   };
 
-  // --- HANDLERS ---
+  /* ---------------- HANDLERS ---------------- */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -48,248 +54,258 @@ export default function MakePass() {
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  // --- FINAL ACTION: GO TO AUTH ---
   const handleCreate = () => {
-    // Save draft so data isn't lost during sign up
-    if (typeof window !== 'undefined') {
-      localStorage.setItem("giftDraft", JSON.stringify(formData));
-    }
-    // Redirect to Auth page
-    router.push("/auth");
+    const token = localStorage.getItem("token");
+    localStorage.setItem(
+      "pending_gift",
+      JSON.stringify({
+        gifterName: "Anonymous",
+        message: formData.message,
+        password: formData.password,
+        plan: formData.plan,
+        title: formData.title,
+        hint: formData.hint,
+      })
+    );
+    router.push(token ? "/create-gift" : "/auth");
   };
 
-  // --- CONFIG ---
-  const quickTitles = ["Happy Birthday 🎂", "Happy Anniversary ❤️", "Open When You Miss Me 💌", "For My Bestie 👯‍♀️"];
-  
-  const magicFeatures = [
-    { icon: "🎁", title: "Treasure Box", sub: "Hidden photos" },
-    { icon: "🔮", title: "Crystal Ball", sub: "Future reveal" },
-    { icon: "🎡", title: "Spin Wheel", sub: "Decision maker" },
-    { icon: "🎈", title: "Balloon Pop", sub: "Interactive fun" },
-    { icon: "🎉", title: "Confetti", sub: "Celebration" },
-  ];
-
-  const basicFeatures = [
-    { title: "Secret Password", sub: "Standard encryption" },
-    { title: "Simple Text", sub: "No formatting" },
-    { title: "Standard Theme", sub: "Basic white background" },
-  ];
-
-  // Animation Variants
+  /* ---------------- ANIMATIONS ---------------- */
   const variants = {
-    enter: (direction: number) => ({ x: direction > 0 ? 50 : -50, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (direction: number) => ({ x: direction < 0 ? 50 : -50, opacity: 0 }),
+    enter: (direction: number) => ({ x: direction > 0 ? 50 : -50, opacity: 0, scale: 0.98, filter: "blur(10px)" }),
+    center: { x: 0, opacity: 1, scale: 1, filter: "blur(0px)" },
+    exit: (direction: number) => ({ x: direction < 0 ? 50 : -50, opacity: 0, scale: 0.98, filter: "blur(10px)" }),
   };
+
+  const quickTitles = ["Happy Birthday", "Anniversary", "Just Because", "Miss You"];
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#FDFCFD] font-sans flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#F2F2F7] overflow-hidden relative font-sans">
       
-      {/* Background Atmosphere */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-pink-100/40 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-50/50 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+      {/* Background Ambience */}
+      <div className="absolute inset-0 z-0">
+         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-200/40 rounded-full blur-[120px]" />
+         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-200/40 rounded-full blur-[120px]" />
       </div>
 
-      <div className="max-w-3xl w-full relative z-10">
+      <div className="max-w-4xl w-full z-10 flex flex-col md:flex-row gap-8 items-center md:items-stretch h-auto md:h-[600px]">
         
-        {/* --- STEP PROGRESS --- */}
-        <div className="flex justify-center mb-10 overflow-x-auto pb-2">
-          <div className="inline-flex bg-white/40 backdrop-blur-md rounded-full p-1.5 border border-white/60 shadow-sm min-w-max">
-            {[1, 2, 3, 4].map((i) => (
-              <div 
-                key={i}
-                className={`px-4 sm:px-6 py-2 rounded-full text-xs font-bold transition-all duration-500 flex items-center gap-2 ${
-                  step === i 
-                    ? "bg-gray-900 text-white shadow-md" 
-                    : step > i 
-                      ? "text-gray-400 bg-gray-100/50" 
-                      : "text-gray-400"
-                }`}
-              >
-                {step > i ? <Check className="w-3 h-3" /> : <span>{i}</span>}
-                <span className="hidden sm:inline">
-                  {i === 1 ? "Occasion" : i === 2 ? "Security" : i === 3 ? "Message" : "Finish"}
-                </span>
-              </div>
-            ))}
-          </div>
+        {/* ---------------- SIDEBAR / PROGRESS (Desktop) ---------------- */}
+        <div className="hidden md:flex flex-col justify-between py-8 w-64 shrink-0">
+           <div>
+             <h1 className="text-2xl font-serif font-bold text-gray-900 mb-2">GiftForge</h1>
+             <p className="text-sm text-gray-500">Create a digital memory.</p>
+           </div>
+
+           <div className="space-y-6">
+              {['Occasion', 'Security', 'Message', 'Experience'].map((label, i) => {
+                const isActive = step === i + 1;
+                const isCompleted = step > i + 1;
+                return (
+                  <div key={i} className="flex items-center gap-4 transition-all duration-500">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-colors duration-300
+                      ${isActive ? 'bg-black text-white border-black' : isCompleted ? 'bg-gray-200 text-gray-600 border-transparent' : 'bg-transparent text-gray-300 border-gray-200'}`}>
+                      {isCompleted ? <Check size={14} /> : i + 1}
+                    </div>
+                    <span className={`text-sm font-medium transition-colors duration-300 ${isActive ? 'text-black' : 'text-gray-400'}`}>
+                      {label}
+                    </span>
+                  </div>
+                )
+              })}
+           </div>
+           
+           <div className="text-xs text-gray-400">Step {step} of 4</div>
         </div>
 
-        {/* --- MAIN CARD --- */}
+        {/* ---------------- MAIN CARD ---------------- */}
         <motion.div 
           layout
-          className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-[2.5rem] shadow-2xl p-6 md:p-10 relative overflow-hidden min-h-[500px] flex flex-col"
+          className="flex-1 bg-white/70 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] border border-white/50 relative overflow-hidden flex flex-col"
         >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 opacity-50" />
+          {/* Mobile Progress Bar (Top) */}
+          <div className="md:hidden h-1.5 bg-gray-100 w-full">
+            <motion.div 
+              className="h-full bg-black" 
+              initial={{ width: 0 }} 
+              animate={{ width: `${(step/4)*100}%` }}
+            />
+          </div>
 
-          <div className="flex-grow">
+          <div className="flex-1 p-8 md:p-12 flex flex-col justify-center">
             <AnimatePresence custom={direction} mode="wait">
               
               {/* STEP 1: TITLE */}
               {step === 1 && (
-                <motion.div key="step1" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" className="space-y-8">
-                  <div className="text-center space-y-2">
-                    <div className="w-14 h-14 bg-rose-50 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-sm">
-                      <Crown className="w-6 h-6 text-rose-500" />
-                    </div>
-                    <h2 className="text-3xl font-serif text-gray-900">What's the Occasion?</h2>
-                    <p className="text-gray-500 text-sm">Give your surprise gift a title.</p>
-                  </div>
-                  <div className="max-w-md mx-auto space-y-6">
-                    <div className="group">
-                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Title of Gift</label>
-                      <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="e.g. Happy Anniversary My Love" autoFocus className="w-full bg-white/50 border border-gray-200 rounded-2xl py-4 pl-6 pr-4 font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-100 focus:border-rose-200 transition-all" />
-                    </div>
-                    <div>
-                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Quick Ideas</p>
-                       <div className="flex flex-wrap gap-2">
-                         {quickTitles.map(t => (
-                           <button key={t} onClick={() => setFormData({...formData, title: t})} className="bg-white/60 hover:bg-white border border-gray-100 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 transition-all hover:shadow-sm">{t}</button>
-                         ))}
-                       </div>
-                    </div>
+                <motion.div key="s1" variants={variants} custom={direction} initial="enter" animate="center" exit="exit" className="w-full">
+                  <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl md:text-5xl font-serif text-gray-900 mb-8 leading-tight">
+                    What are we <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">celebrating?</span>
+                  </motion.h2>
+                  
+                  <input
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="Type the title here..."
+                    className="w-full bg-transparent text-2xl md:text-3xl placeholder:text-gray-300 border-b-2 border-gray-200 focus:border-black py-4 outline-none transition-all"
+                    autoFocus
+                  />
+
+                  <div className="flex gap-3 mt-8 flex-wrap">
+                    {quickTitles.map(t => (
+                      <button key={t} onClick={() => setFormData({...formData, title: t})}
+                        className="px-4 py-2 rounded-full bg-white border border-gray-200 hover:border-gray-400 hover:bg-gray-50 text-sm font-medium text-gray-600 transition-all shadow-sm">
+                        {t}
+                      </button>
+                    ))}
                   </div>
                 </motion.div>
               )}
 
-              {/* STEP 2: PASSWORD */}
+              {/* STEP 2: SECURITY */}
               {step === 2 && (
-                <motion.div key="step2" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" className="space-y-8">
-                  <div className="text-center space-y-2">
-                    <div className="w-14 h-14 bg-pink-50 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-sm">
-                      <Lock className="w-6 h-6 text-pink-500" />
-                    </div>
-                    <h2 className="text-3xl font-serif text-gray-900">Set Security</h2>
-                    <p className="text-gray-500 text-sm">Create a secret key.</p>
+                <motion.div key="s2" variants={variants} custom={direction} initial="enter" animate="center" exit="exit" className="w-full">
+                  <div className="flex items-center gap-4 mb-6">
+                    <motion.div 
+                      animate={{ 
+                        backgroundColor: isUnlocked ? "#10B981" : "#F3F4F6", 
+                        color: isUnlocked ? "#FFF" : "#9CA3AF" 
+                      }}
+                      className="w-16 h-16 rounded-2xl flex items-center justify-center transition-colors duration-500"
+                    >
+                      {isUnlocked ? <Unlock size={32} /> : <Lock size={32} />}
+                    </motion.div>
+                    <h2 className="text-4xl font-serif text-gray-900">Lock it up.</h2>
                   </div>
-                  <div className="space-y-5 max-w-md mx-auto">
-                    <input type="text" name="password" value={formData.password} onChange={handleChange} placeholder="Secret Password" autoFocus className="w-full bg-white/50 border border-gray-200 rounded-2xl py-4 pl-6 pr-4 font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-100 focus:border-pink-200 transition-all" />
-                    <input type="text" name="hint" value={formData.hint} onChange={handleChange} placeholder="Hint (Optional)" className="w-full bg-white/50 border border-gray-200 rounded-2xl py-4 pl-6 pr-4 font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-100 focus:border-purple-200 transition-all" />
+
+                  <div className="space-y-6">
+                    <div className="group relative">
+                      <input
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        type="text" 
+                        placeholder="Create a password..."
+                        className="w-full bg-gray-50/50 hover:bg-gray-50 focus:bg-white rounded-xl px-6 py-6 text-xl outline-none border border-transparent focus:border-gray-200 focus:shadow-xl transition-all"
+                        autoFocus
+                      />
+                      <Key className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
+                    </div>
+                    
+                    <input
+                      name="hint"
+                      value={formData.hint}
+                      onChange={handleChange}
+                      placeholder="Add a hint (optional)"
+                      className="w-full bg-transparent px-6 py-3 text-gray-500 placeholder:text-gray-300 text-lg outline-none border-b border-gray-100 focus:border-gray-300 transition-all"
+                    />
                   </div>
                 </motion.div>
               )}
 
               {/* STEP 3: MESSAGE */}
               {step === 3 && (
-                <motion.div key="step3" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" className="space-y-8">
-                  <div className="text-center space-y-2">
-                     <div className="w-14 h-14 bg-purple-50 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-sm">
-                      <MessageCircle className="w-6 h-6 text-purple-500" />
+                <motion.div key="s3" variants={variants} custom={direction} initial="enter" animate="center" exit="exit" className="w-full h-full">
+                  <h2 className="text-4xl font-serif text-gray-900 mb-6">From the heart.</h2>
+                  <div className="relative h-[300px] w-full">
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      placeholder="Write your beautiful message here..."
+                      className="w-full h-full bg-[#fffff0] text-gray-800 p-8 rounded-tr-[40px] rounded-bl-[40px] rounded-tl-lg rounded-br-lg shadow-sm border border-stone-100 text-lg leading-relaxed resize-none outline-none focus:shadow-md transition-all font-serif"
+                      autoFocus
+                    />
+                    <div className="absolute top-4 right-4 opacity-20 rotate-12">
+                      <Type size={60} />
                     </div>
-                    <h2 className="text-3xl font-serif text-gray-900">Write Message</h2>
-                    <p className="text-gray-500 text-sm">Pour your heart out.</p>
-                  </div>
-                  <div className="relative group max-w-lg mx-auto">
-                    <textarea name="message" value={formData.message} onChange={handleChange} autoFocus placeholder="My dearest..." className="w-full h-56 bg-white/50 border border-gray-200 rounded-3xl p-6 font-serif text-lg text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-100 focus:border-purple-200 transition-all resize-none leading-relaxed" />
                   </div>
                 </motion.div>
               )}
 
               {/* STEP 4: EXPERIENCE */}
               {step === 4 && (
-                <motion.div key="step4" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" className="space-y-6">
-                  <div className="text-center space-y-2 mb-6">
-                     <div className="w-14 h-14 bg-indigo-50 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-sm">
-                      <Gift className="w-6 h-6 text-indigo-500" />
-                    </div>
-                    <h2 className="text-3xl font-serif text-gray-900">Final Touch</h2>
-                    <p className="text-gray-500 text-sm">Select a reveal style.</p>
-                  </div>
+                <motion.div key="s4" variants={variants} custom={direction} initial="enter" animate="center" exit="exit" className="w-full">
+                  <h2 className="text-4xl font-serif text-gray-900 mb-8 text-center">Choose the vibe.</h2>
                   
-                  {/* Cards Grid */}
-                  <div className="grid md:grid-cols-2 gap-5">
-                    {/* Basic Card */}
-                    <div onClick={() => setFormData({ ...formData, plan: "basic" })} className={`relative p-6 rounded-3xl border-2 transition-all duration-300 cursor-pointer group ${formData.plan === "basic" ? "bg-white border-gray-900 shadow-xl scale-[1.02]" : "bg-white/40 border-transparent hover:bg-white/80 hover:border-gray-200 grayscale-[0.5] hover:grayscale-0"}`}>
-                      <div className="flex justify-between items-start mb-4">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border border-gray-200 px-2 py-0.5 rounded">Option A</span>
-                        {formData.plan === "basic" && <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center"><Check className="w-3 h-3 text-white"/></div>}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* BASIC CARD (Always Active) */}
+                    <div 
+                      onClick={() => setFormData({...formData, plan: "basic_reveal"})}
+                      className={`relative group cursor-pointer p-6 rounded-3xl border-2 transition-all duration-300 border-gray-900 bg-gray-50 shadow-lg`}
+                    >
+                      <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 text-gray-900">
+                        <Gift size={24} />
                       </div>
-                      <span className="text-3xl font-serif text-gray-900">₹99</span>
-                      <h3 className="font-bold text-gray-700 text-sm mt-1">Basic Reveal</h3>
+                      <h3 className="text-xl font-bold mb-2">Classic Reveal</h3>
+                      <p className="text-sm text-gray-500 mb-4">Clean, simple, and minimal.</p>
+                      <div className="absolute top-6 right-6"><CheckCircleIcon /></div>
                     </div>
 
-                    {/* Magic Card */}
-                    <div onClick={() => setFormData({ ...formData, plan: "magic" })} className={`relative p-6 rounded-3xl border-2 transition-all duration-300 cursor-pointer overflow-hidden group ${formData.plan === "magic" ? "bg-gradient-to-br from-white to-purple-50 border-purple-500 shadow-2xl shadow-purple-200/50 scale-[1.02]" : "bg-white/40 border-transparent hover:bg-white/80 hover:border-purple-200"}`}>
-                      <div className="flex justify-between items-start mb-4 relative z-10">
-                        <span className="text-[10px] font-bold text-white bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-1 rounded-full shadow-sm flex items-center gap-1"><Star className="w-2 h-2 fill-white" /> POPULAR</span>
-                        {formData.plan === "magic" && <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center"><Check className="w-3 h-3 text-white"/></div>}
+                    {/* PREMIUM CARD (Disabled) */}
+                    <div 
+                      className="relative p-6 rounded-3xl border-2 border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed grayscale overflow-hidden"
+                    >
+                      {/* Disabled Overlay Badge */}
+                      <div className="absolute top-4 right-4 bg-gray-200 text-gray-500 text-[10px] font-bold px-2 py-1 rounded-md z-20">
+                        COMING SOON
                       </div>
-                      <span className="text-3xl font-serif text-gray-900">₹499</span>
-                      <h3 className="font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent text-sm mt-1">Magic Experience</h3>
+
+                      <div className="relative z-10">
+                         <div className="flex justify-between items-start mb-4">
+                           <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-white">
+                             <Sparkles size={24} />
+                           </div>
+                         </div>
+                         <h3 className="text-xl font-bold mb-2 flex items-center gap-2">Magic Experience</h3>
+                         <p className="text-sm text-gray-600 mb-4">Confetti, animations & cinematic reveals.</p>
+                         <div className="flex gap-2 text-purple-600/50">
+                            <PartyPopper size={16} />
+                            <Crown size={16} />
+                            <Heart size={16} />
+                         </div>
+                      </div>
                     </div>
                   </div>
-
-                  {/* Details Panel */}
-                  <motion.div layout className="bg-white/50 rounded-[2rem] border border-white/60 shadow-inner overflow-hidden">
-                    <AnimatePresence mode="wait">
-                      {formData.plan === "magic" ? (
-                        <motion.div key="magic" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-6 bg-gradient-to-b from-purple-50/50 to-transparent">
-                          <div className="flex items-center gap-2 mb-4">
-                            <Sparkles className="w-4 h-4 text-purple-600" />
-                            <span className="text-xs font-bold text-purple-900 uppercase tracking-wide">Included Magic Features</span>
-                          </div>
-                          <div className="grid grid-cols-3 gap-3">
-                            {magicFeatures.map((f, i) => (
-                              <div key={i} className={`flex flex-col items-center text-center p-3 bg-white rounded-2xl shadow-sm border border-purple-100/50 ${i >= 3 ? "col-span-1.5" : ""}`}>
-                                <span className="text-2xl mb-1">{f.icon}</span>
-                                <span className="text-[10px] font-bold text-gray-800">{f.title}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </motion.div>
-                      ) : (
-                        <motion.div key="basic" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-6">
-                           <div className="space-y-3">
-                            {basicFeatures.map((f, i) => (
-                              <div key={i} className="flex items-center gap-4 p-3 bg-white rounded-2xl border border-gray-100">
-                                <CheckCircle2 className="w-4 h-4 text-gray-400" />
-                                <p className="text-xs font-bold text-gray-900">{f.title}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
                 </motion.div>
               )}
 
             </AnimatePresence>
           </div>
 
-          {/* --- FOOTER ACTIONS --- */}
-          <div className="flex items-center justify-between mt-10 pt-6 border-t border-gray-100">
-            {step > 1 ? (
-              <button onClick={prevStep} className="text-gray-400 text-sm font-medium hover:text-gray-800 transition flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" /> Back
-              </button>
-            ) : <div />}
-            
-            <motion.button 
-              whileHover={isStepValid() ? { scale: 1.02 } : {}}
-              whileTap={isStepValid() ? { scale: 0.98 } : {}}
-              onClick={step === 4 ? handleCreate : nextStep} // Use handleCreate for Step 4
-              disabled={!isStepValid()}
-              className={`px-8 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 transition-all ${
-                isStepValid() 
-                  ? step === 4
-                    ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-pink-200 cursor-pointer" 
-                    : "bg-gray-900 text-white hover:bg-gray-800 cursor-pointer"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
-              }`}
-            >
-              {step === 4 ? (
-                <>Create Gift <Sparkles className="w-4 h-4 animate-pulse" /></>
-              ) : (
-                <>Next Step <ArrowRight className="w-4 h-4" /></>
-              )}
-            </motion.button>
-          </div>
+          {/* NAV FOOTER */}
+          <div className="p-8 border-t border-gray-100/50 flex justify-between items-center bg-white/30">
+             <button 
+               onClick={prevStep} 
+               disabled={step === 1}
+               className={`flex items-center gap-2 text-sm font-medium transition-colors ${step === 1 ? 'opacity-0 cursor-default' : 'text-gray-500 hover:text-black'}`}
+             >
+               <ArrowLeft size={16} /> Back
+             </button>
 
+             <button 
+               onClick={step === 4 ? handleCreate : nextStep}
+               disabled={!isStepValid()}
+               className={`
+                 relative overflow-hidden px-8 py-3 rounded-2xl flex items-center gap-2 font-medium transition-all duration-300
+                 ${!isStepValid() 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'bg-black text-white hover:bg-gray-900 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'}
+               `}
+             >
+               <span className="relative z-10">{step === 4 ? "Create Gift" : "Continue"}</span>
+               {isStepValid() && <ArrowRight size={16} className="relative z-10" />}
+             </button>
+          </div>
         </motion.div>
+
       </div>
     </div>
   );
 }
+
+const CheckCircleIcon = () => (
+  <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
+    <Check size={14} className="text-white" />
+  </div>
+);

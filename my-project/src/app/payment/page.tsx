@@ -1,266 +1,365 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import Confetti from "react-confetti";
 import { 
-  CreditCard, Smartphone, ShieldCheck, Lock, 
-  QrCode, Check, ArrowRight 
+  CreditCard, Lock, ShieldCheck, CheckCircle2, 
+  Loader2, Gift, Wifi, Smartphone, Copy, ExternalLink, Share2
 } from "lucide-react";
-import Confetti from "react-confetti"; 
 
-// --- 1. COMPONENTS ---
+const API_URL = "https://nationalistically-parisonic-tim.ngrok-free.dev";
 
-const AnimatedCheck = () => (
-  <div className="relative w-24 h-24 mx-auto mb-6">
-    <motion.svg viewBox="0 0 50 50" className="w-full h-full drop-shadow-lg">
-      <motion.circle cx="25" cy="25" r="23" fill="#10B981" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.4, ease: "backOut" }} />
-      <motion.path d="M14 26 L22 33 L36 16" fill="transparent" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }} />
-    </motion.svg>
-  </div>
-);
-
-// --- 2. DATA ---
-
-const giftFacts = [
-  "Did you know? Giving gifts activates the same part of the brain as eating chocolate! 🍫",
-  "Digital memories don't fade, tear, or get lost. They are forever. ✨",
-  "Surprises trigger a release of dopamine, the 'feel-good' hormone. 🧠",
-  "Thoughtful gifts strengthen relationships more than expensive ones. ❤️",
-  "We are securing your memories on the blockchain now... 🔒"
-];
+type GiftDraft = {
+  gifterName: string;
+  message: string;
+  password: string;
+  plan: "basic_reveal" | "magic_experience";
+  title?: string;
+};
 
 export default function PaymentPage() {
   const router = useRouter();
-  const [view, setView] = useState<"payment" | "success" | "loading">("payment");
-  const [method, setMethod] = useState<"upi" | "card">("upi");
+
+  // ✅ Added "ready" state
+  const [view, setView] = useState<"payment" | "success" | "wrapping" | "ready">("payment");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [factIndex, setFactIndex] = useState(0);
+  const [giftDraft, setGiftDraft] = useState<GiftDraft | null>(null);
+  const [generatedGiftId, setGeneratedGiftId] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
   
-  // Confetti Window Size
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-  
-  useEffect(() => {
-    setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-  }, []);
 
-  // Cycle Facts during Loading Phase
+  /* --------------------------------
+      INIT & AUTH CHECK
+  -------------------------------- */
   useEffect(() => {
-    if (view === "loading") {
-      const interval = setInterval(() => {
-        setFactIndex((prev) => (prev + 1) % giftFacts.length);
-      }, 2500); // Change fact every 2.5s
-      return () => clearInterval(interval);
+    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    const token = localStorage.getItem("token");
+    const draft = localStorage.getItem("pending_gift");
+
+    if (!token) {
+      router.replace("/auth");
+      return;
     }
-  }, [view]);
 
-  // --- HANDLERS ---
+    if (!draft) {
+      router.replace("/create-gift");
+      return;
+    }
 
-  const handlePayment = () => {
-    setIsProcessing(true);
-    // 1. Simulate Gateway (2s)
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      setGiftDraft(JSON.parse(draft));
+    } catch {
+      localStorage.removeItem("pending_gift");
+      router.replace("/create-gift");
+    }
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, [router]);
+
+  /* --------------------------------
+      PAYMENT LOGIC
+  -------------------------------- */
+  const handlePayment = async () => {
+    if (!giftDraft) return;
+
+    try {
+      setIsProcessing(true);
+
+      // 1️⃣ UI Delay
+      await new Promise((res) => setTimeout(res, 2000));
+
+      // 2️⃣ API Call
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/gifts/create-after-payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          gifter_name: giftDraft.gifterName,
+          message: giftDraft.message,
+          password: giftDraft.password,
+          plan: giftDraft.plan,
+          title: giftDraft.title || "Untitled Gift"
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Payment failed");
+
+      setGeneratedGiftId(data.gift_id);
+
+      // 3️⃣ Payment Success View
       setView("success");
-      
-      // 2. Stay on Success Screen (3s)
+
+      // 4️⃣ Wrapping Animation
       setTimeout(() => {
-        setView("loading");
-        
-        // 3. Stay on Loading/Facts Screen (6s) then Redirect
+        setView("wrapping");
+
+        // 5️⃣ Show "Ready" Dashboard (Stopped Auto-Redirect)
         setTimeout(() => {
-           router.push("/gift");
-        }, 6000);
-        
-      }, 3000);
-    }, 2000);
+          setView("ready");
+          localStorage.removeItem("pending_gift");
+        }, 3500); 
+
+      }, 2500);
+
+    } catch (err) {
+      console.error("Payment failed:", err);
+      setView("payment");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const plan = { name: "Magic Experience", price: 499, tax: 90 };
-  const total = plan.price + plan.tax;
+  /* --------------------------------
+      HELPERS
+  -------------------------------- */
+  const copyToClipboard = () => {
+    if (!generatedGiftId) return;
+    // Construct absolute URL (adjust domain for production)
+    const url = `${window.location.origin}/reveal/${generatedGiftId}`;
+    navigator.clipboard.writeText(url);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const handlePreview = () => {
+    if (!generatedGiftId) return;
+    // Open in new tab so they don't lose the share screen
+    window.open(`/reveal/${generatedGiftId}`, '_blank');
+  };
+
+  const price = giftDraft?.plan === "magic_experience" ? 589 : 0;
+  const tax = Math.round(price * 0.18);
+  const total = price + tax;
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: "easeOut" } },
+    exit: { opacity: 0, y: -20, scale: 0.95, transition: { duration: 0.3 } }
+  };
+
+  if (!giftDraft) return null;
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#FDFCFD] font-sans flex items-center justify-center p-4 md:p-8">
+    <div className="min-h-screen bg-[#F2F2F7] flex items-center justify-center p-4 relative overflow-hidden font-sans">
       
-      {/* Background Atmosphere */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-100/40 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-pink-50/50 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-      </div>
+      {/* Background Ambience */}
+      <div className="absolute top-[-20%] left-[-20%] w-[70%] h-[70%] bg-purple-200/40 rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-20%] right-[-20%] w-[70%] h-[70%] bg-blue-200/40 rounded-full blur-[120px]" />
 
-      <div className="max-w-5xl w-full relative z-10">
+      {/* Confetti - Only show during success/wrapping */}
+      {(view === "success" || view === "ready") && (
+        <Confetti 
+          width={windowSize.width} 
+          height={windowSize.height} 
+          numberOfPieces={view === "ready" ? 100 : 300} 
+          recycle={false}
+          gravity={0.2}
+        />
+      )}
+
+      <div className="relative z-10 w-full max-w-md">
         <AnimatePresence mode="wait">
 
-          {/* --- VIEW 1: PAYMENT FORM --- */}
+          {/* ---------------- STATE 1: PAYMENT CARD ---------------- */}
           {view === "payment" && (
-            <motion.div 
-              key="payment"
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.5 }}
+            <motion.div
+              key="payment-card"
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-white/80 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-2xl overflow-hidden"
             >
-               <h1 className="text-3xl md:text-4xl font-serif text-gray-900 text-center mb-8">Secure Payment</h1>
-
-               <div className="grid lg:grid-cols-12 gap-8">
-                  {/* Left: Methods */}
-                  <div className="lg:col-span-7 space-y-6">
-                    <div className="flex gap-4">
-                      <button onClick={() => setMethod("upi")} className={`flex-1 py-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${method === "upi" ? "bg-white border-purple-500 shadow-lg text-purple-700" : "bg-white/40 border-transparent hover:bg-white/60 text-gray-500"}`}>
-                        <Smartphone className="w-6 h-6" /> <span className="font-bold text-sm">UPI / QR</span>
-                      </button>
-                      <button onClick={() => setMethod("card")} className={`flex-1 py-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${method === "card" ? "bg-white border-purple-500 shadow-lg text-purple-700" : "bg-white/40 border-transparent hover:bg-white/60 text-gray-500"}`}>
-                        <CreditCard className="w-6 h-6" /> <span className="font-bold text-sm">Card</span>
-                      </button>
-                    </div>
-
-                    <div className="bg-white/60 backdrop-blur-xl border border-white/80 rounded-[2rem] p-8 shadow-xl min-h-[400px]">
-                      {method === "upi" ? (
-                        <div className="space-y-6 text-center">
-                          <div className="bg-white p-6 rounded-3xl shadow-inner border border-gray-100 inline-block"><QrCode className="w-32 h-32 text-gray-800 mx-auto opacity-80" /></div>
-                          <p className="text-sm text-gray-500">Scan with any UPI App</p>
-                          <div className="flex justify-center gap-4">
-                            {["GPay", "PhonePe", "Paytm"].map((app) => (
-                              <button key={app} className="px-6 py-2 rounded-full border border-gray-200 bg-white hover:border-purple-200 hover:text-purple-600 transition-colors text-sm font-bold text-gray-600">{app}</button>
-                            ))}
-                          </div>
-                          <input type="text" placeholder="example@okhdfc" className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 text-center focus:ring-2 focus:ring-purple-100 outline-none" />
-                        </div>
-                      ) : (
-                        <div className="space-y-6">
-                          <div className="w-full h-48 rounded-3xl bg-gradient-to-br from-gray-900 to-gray-700 p-6 flex flex-col justify-between text-white shadow-xl relative overflow-hidden">
-                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                             <div className="flex justify-between items-start"><div className="w-12 h-8 bg-yellow-500/80 rounded-md"></div><span className="font-mono text-lg tracking-widest opacity-80">VISA</span></div>
-                             <div><div className="font-mono text-xl tracking-widest mb-1">•••• •••• •••• 4242</div><div className="flex justify-between text-xs opacity-70 uppercase"><span>Card Holder</span><span>Expires</span></div></div>
-                          </div>
-                          <div className="space-y-4">
-                            <input type="text" placeholder="Card Number" className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 outline-none focus:ring-2 focus:ring-purple-100" />
-                            <div className="grid grid-cols-2 gap-4">
-                              <input type="text" placeholder="MM / YY" className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 outline-none focus:ring-2 focus:ring-purple-100" />
-                              <input type="text" placeholder="CVV" className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 outline-none focus:ring-2 focus:ring-purple-100" />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+              {/* ... (Payment UI code remains the same as before) ... */}
+              <div className="p-8 border-b border-gray-100 bg-white/40">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-2xl font-serif font-bold text-gray-900">Checkout</h2>
+                    <p className="text-sm text-gray-500 mt-1">Secure encrypted payment</p>
                   </div>
-
-                  {/* Right: Summary */}
-                  <div className="lg:col-span-5">
-                    <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-8 shadow-2xl h-full flex flex-col">
-                      <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
-                      <div className="flex-1 space-y-6">
-                        <div className="flex items-start gap-4 pb-6 border-b border-gray-100">
-                          <div className="w-16 h-16 bg-gradient-to-br from-pink-100 to-purple-100 rounded-2xl flex items-center justify-center text-2xl shadow-sm">🎁</div>
-                          <div><h3 className="font-bold text-gray-900">{plan.name}</h3><p className="text-xs text-gray-500 mt-1">Includes Animations, Media Uploads & Forever Hosting.</p></div>
-                        </div>
-                        <div className="space-y-3 text-sm">
-                          <div className="flex justify-between text-gray-600"><span>Subtotal</span><span>₹{plan.price}</span></div>
-                          <div className="flex justify-between text-gray-600"><span>Tax (18% GST)</span><span>₹{plan.tax}</span></div>
-                          <div className="flex justify-between font-bold text-lg text-gray-900 pt-3 border-t border-gray-100"><span>Total</span><span>₹{total}</span></div>
-                        </div>
-                        <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-3 flex gap-2 items-start"><ShieldCheck className="w-4 h-4 text-yellow-600 mt-0.5" /><p className="text-xs text-yellow-800 leading-relaxed"><strong>100% Money Back Guarantee.</strong> No questions asked.</p></div>
-                      </div>
-                      <div className="mt-8">
-                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handlePayment} disabled={isProcessing} className="w-full py-4 rounded-xl bg-gray-900 text-white font-bold text-lg shadow-xl shadow-purple-200 hover:shadow-purple-300 transition-all flex items-center justify-center gap-2 relative overflow-hidden">
-                          {isProcessing ? <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Processing...</span> : <>Pay ₹{total} <Lock className="w-4 h-4 opacity-70" /></>}
-                        </motion.button>
-                      </div>
-                    </div>
+                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
+                    <Lock size={18} />
                   </div>
-               </div>
-            </motion.div>
-          )}
-
-          {/* --- VIEW 2: SUCCESS CELEBRATION --- */}
-          {view === "success" && (
-            <motion.div 
-              key="success"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ opacity: 0, scale: 1.1 }}
-              className="flex flex-col items-center justify-center min-h-[50vh] text-center"
-            >
-              <Confetti width={windowSize.width} height={windowSize.height} recycle={false} numberOfPieces={800} gravity={0.2} />
-              
-              <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[3rem] p-12 shadow-2xl max-w-md w-full">
-                <AnimatedCheck />
-                <motion.h1 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-4xl font-serif text-gray-900 mb-4"
-                >
-                  Payment Successful!
-                </motion.h1>
-                <motion.p 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.7 }}
-                  className="text-gray-500 font-medium"
-                >
-                  Your magical gift has been created and secured on the blockchain.
-                </motion.p>
-              </div>
-            </motion.div>
-          )}
-
-          {/* --- VIEW 3: LOADING FACTS (The "Wrapping" Screen) --- */}
-          {view === "loading" && (
-            <motion.div 
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center min-h-[60vh] text-center max-w-2xl mx-auto"
-            >
-              {/* Custom Heart Loader */}
-              <div className="relative w-32 h-32 mb-12">
-                <motion.div 
-                   animate={{ scale: [1, 1.1, 1] }}
-                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                   className="absolute inset-0 bg-pink-100 rounded-full opacity-50 blur-xl"
-                />
-                <div className="relative w-full h-full border-4 border-pink-100 rounded-full flex items-center justify-center">
-                  <motion.div 
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-0 border-4 border-t-pink-500 border-r-transparent border-b-transparent border-l-transparent rounded-full"
-                  />
-                  <div className="text-4xl animate-pulse">🎁</div>
                 </div>
               </div>
-
-              {/* Animated Facts Text */}
-              <div className="h-32 flex items-center justify-center relative w-full">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={factIndex}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="absolute w-full px-4"
-                  >
-                    <h3 className="text-2xl font-serif text-gray-900 italic leading-relaxed">
-                      "{giftFacts[factIndex]}"
-                    </h3>
-                  </motion.div>
-                </AnimatePresence>
+              <div className="p-8 space-y-6">
+                <div className="relative h-48 rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6 text-white shadow-lg shadow-black/20 flex flex-col justify-between overflow-hidden">
+                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                   <div className="flex justify-between items-center z-10">
+                      <CreditCard className="opacity-80" />
+                      <Wifi className="rotate-90 opacity-60" size={20} />
+                   </div>
+                   <div className="space-y-4 z-10">
+                      <div className="flex gap-4 items-center opacity-90 font-mono text-lg tracking-widest">
+                        <span>••••</span><span>••••</span><span>••••</span><span>4242</span>
+                      </div>
+                      <div className="flex justify-between items-end">
+                         <div className="text-xs opacity-70 uppercase tracking-wider">Card Holder<br/><span className="text-sm font-bold text-white normal-case">John Doe</span></div>
+                         <div className="text-xs opacity-70 uppercase tracking-wider">Expires<br/><span className="text-sm font-bold text-white normal-case">12/28</span></div>
+                      </div>
+                   </div>
+                </div>
+                <div className="space-y-3 pt-2">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{giftDraft.plan === "magic_experience" ? "Magic Experience" : "Basic Reveal"}</span>
+                    <span>₹{price}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Taxes & Fees</span>
+                    <span>₹{tax}</span>
+                  </div>
+                  <div className="h-px bg-gray-200 my-2" />
+                  <div className="flex justify-between items-end">
+                    <span className="font-bold text-gray-900">Total</span>
+                    <span className="font-serif text-3xl font-bold text-gray-900">₹{total}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={handlePayment}
+                  disabled={isProcessing}
+                  className="w-full py-4 bg-black text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                >
+                  {isProcessing ? (
+                    <>Processing <Loader2 className="animate-spin" /></>
+                  ) : (
+                    <>Pay Now <ShieldCheck size={18} /></>
+                  )}
+                </button>
+                <div className="text-center text-[10px] text-gray-400 uppercase tracking-widest flex justify-center gap-1 items-center">
+                  <Lock size={10} /> 256-Bit SSL Encrypted
+                </div>
               </div>
+            </motion.div>
+          )}
 
+          {/* ---------------- STATE 2: SUCCESS ---------------- */}
+          {view === "success" && (
+            <motion.div
+              key="success-card"
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-white/90 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-2xl p-12 text-center"
+            >
               <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 6 }}
-                className="w-64 h-1.5 bg-gray-100 rounded-full mt-8 overflow-hidden"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6"
               >
-                <div className="h-full bg-gradient-to-r from-pink-500 to-purple-500 rounded-full" style={{ width: "100%", transition: "width 6s linear" }}></div>
+                <CheckCircle2 size={48} />
               </motion.div>
-              
-              <p className="text-xs text-gray-400 mt-4 font-bold uppercase tracking-widest animate-pulse">
-                Preparing your surprise...
-              </p>
+              <h2 className="text-3xl font-serif font-bold text-gray-900 mb-2">Payment Verified</h2>
+              <p className="text-gray-500 mb-8">Your transaction was successful.</p>
+            </motion.div>
+          )}
 
+          {/* ---------------- STATE 3: WRAPPING ---------------- */}
+          {view === "wrapping" && (
+            <motion.div
+              key="wrapping-card"
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="text-center"
+            >
+              <div className="relative w-32 h-32 mx-auto mb-8">
+                <div className="absolute inset-0 bg-purple-400/20 rounded-full animate-ping" />
+                <div className="relative bg-white w-32 h-32 rounded-full flex items-center justify-center shadow-xl">
+                  <Gift size={48} className="text-purple-600 animate-bounce" />
+                </div>
+              </div>
+              <h2 className="text-3xl font-serif font-bold text-gray-900 mb-3">Wrapping your gift...</h2>
+              <p className="text-gray-500">Adding the final sparkles.</p>
+              <div className="mt-8 w-48 h-1.5 bg-gray-200 rounded-full mx-auto overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 3.5 }}
+                  className="h-full bg-purple-600"
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {/* ---------------- STATE 4: READY (THE DASHBOARD) ---------------- */}
+          {view === "ready" && generatedGiftId && (
+            <motion.div
+              key="ready-card"
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-white/90 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-2xl overflow-hidden"
+            >
+              <div className="p-10 text-center">
+                <div className="w-20 h-20 bg-gradient-to-tr from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                  <Gift size={40} className="text-purple-600" />
+                </div>
+                
+                <h2 className="text-3xl font-serif font-bold text-gray-900 mb-2">Your Gift is Ready!</h2>
+                <p className="text-gray-500 mb-8">
+                  The link has been generated. Share it with your special someone.
+                </p>
+
+                {/* Link Box */}
+                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-2 flex items-center gap-2 mb-6">
+                  <div className="flex-1 px-3 overflow-hidden text-left">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Gift Link</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {window.location.origin}/reveal/{generatedGiftId}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={copyToClipboard}
+                    className="p-3 bg-white rounded-xl shadow-sm border border-gray-100 hover:bg-gray-50 active:scale-95 transition-all text-gray-700"
+                  >
+                    {isCopied ? <CheckCircle2 size={20} className="text-green-500"/> : <Copy size={20} />}
+                  </button>
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-3">
+                  <button
+                    onClick={handlePreview}
+                    className="w-full py-4 bg-black text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
+                  >
+                    Preview Gift <ExternalLink size={18} />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/reveal/${generatedGiftId}`;
+                      window.open(`https://wa.me/?text=I%20made%20something%20special%20for%20you!%20Open%20it%20here:%20${encodeURIComponent(url)}`, '_blank');
+                    }}
+                    className="w-full py-4 bg-[#25D366] text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
+                  >
+                    Share via WhatsApp <Share2 size={18} />
+                  </button>
+                </div>
+
+                <div className="mt-8">
+                  <button 
+                    onClick={() => router.push("/create-gift")}
+                    className="text-sm text-gray-400 hover:text-gray-600 underline decoration-gray-300"
+                  >
+                    Create another gift
+                  </button>
+                </div>
+
+              </div>
             </motion.div>
           )}
 
